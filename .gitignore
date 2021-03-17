@@ -10,6 +10,7 @@
 /src/use-rxjs-requests
 /src
 *.md
+*.json
 /.pnp
 *.json
 *.lock
