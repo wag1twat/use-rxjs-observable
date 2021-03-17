@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { RxRequestResult, SingleObservableConfigure } from "../types";
+import { RxRequestResult, SingleObservableConfigure, UseRxRequestFetchFn } from "../types";
 export default class SingleObservable<Data, Error> extends Observable<RxRequestResult<Data, Error>> {
     private config;
     private subscriberConfig;
@@ -11,5 +11,5 @@ export default class SingleObservable<Data, Error> extends Observable<RxRequestR
     private stateListener;
     private subscriberConfigListener;
     configure: SingleObservableConfigure<Data, Error>;
-    fetch: () => void;
+    fetch: UseRxRequestFetchFn;
 }

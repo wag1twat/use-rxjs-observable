@@ -26,9 +26,15 @@ export interface UseRxRequestsValue<Data, Error> {
     state: RxRequestResult<Data, Error>[];
     fetch: () => void;
 }
+export interface UseRxRequestFetchFn {
+    (config?: {
+        body: RxRequestConfig["body"];
+        params: RxRequestConfig["params"];
+    }): Promise<void>;
+}
 export interface UseRxRequestValue<Data, Error> {
     state: Partial<RxRequestResult<Data, Error>>;
-    fetch: () => void;
+    fetch: UseRxRequestFetchFn;
 }
 export interface MultiObservableConfigure<Data, Error> {
     (configs: RxRequestConfig[], subscriberConfig: RxRequestsSubscriberConfig): MultiObservable<Data, Error>;
