@@ -9,6 +9,7 @@
 /src/*.ts
 /src/use-rxjs-requests
 /src
+*.json
 /.pnp
 *.json
 *.lock
