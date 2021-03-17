@@ -2,7 +2,14 @@
 
 # dependencies
 /node_modules
+/public
+/src/*.tsx
+/src/*.css
+/src/*.svg
+/src/*.ts
 /.pnp
+*.json
+*.lock
 .pnp.js
 
 # testing
