@@ -7,6 +7,9 @@
 /src/*.css
 /src/*.svg
 /src/*.ts
+/src/use-rxjs-requests
+/src
+*.md
 /.pnp
 *.json
 *.lock
