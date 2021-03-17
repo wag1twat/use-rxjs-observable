@@ -3,6 +3,8 @@ import MultiObservable from "../Observables/multi";
 import SingleObservable from "../Observables/single";
 export interface RxRequestsSubscriberConfig {
     fetchOnMount?: boolean;
+    fetchOnUpdateConfigs?: boolean;
+    fetchOnUpdateConfig?: boolean;
     refetchInterval?: number;
 }
 export interface RxRequestConfig {

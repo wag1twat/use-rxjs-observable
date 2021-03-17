@@ -42,15 +42,22 @@ var MultiObservable = /** @class */ (function (_super) {
             observer.add(_this.initialState$.subscribe(_this.initialStateListener));
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.subscriberConfig.subscribe(_this.subscriberConfigListener(observer)));
+            observer.add(rxjs_1.from(_this.configs)
+                .pipe(operators_1.takeWhile(function () {
+                return Boolean(_this.subscriberConfig.getValue().fetchOnUpdateConfigs);
+            }))
+                .subscribe(function () { return _this.fetch(); }));
         }) || this;
         // @ts-ignore //TODO: thinking for typing
-        _this.configs = new rxjs_1.BehaviorSubject([]);
-        // @ts-ignore //TODO: thinking for typing
-        _this.subscriberConfig = new rxjs_1.BehaviorSubject({ fetchOnMount: false, refetchInterval: undefined });
+        _this.subscriberConfig = new rxjs_1.BehaviorSubject({
+            fetchOnMount: false,
+            refetchInterval: undefined,
+            fetchOnUpdateConfigs: undefined
+        });
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
-            return lodash_1.reduce(_this.configs.getValue(), function (acc, mutableRequestConfig) {
+            return lodash_1.reduce(_this.configs, function (acc, mutableRequestConfig) {
                 var _a;
                 return __assign(__assign({}, acc), (_a = {}, _a[mutableRequestConfig.requestId] = new Results_1.IdleRequest(mutableRequestConfig.requestId, mutableRequestConfig), _a));
             }, {});
@@ -73,14 +80,14 @@ var MultiObservable = /** @class */ (function (_super) {
             }
         }; };
         _this.configure = function (configs, subscriberConfig) {
-            _this.configs.next(lodash_1.map(configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); }));
+            _this.configs = lodash_1.map(configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); });
             _this.subscriberConfig.next(subscriberConfig);
             var self = _this;
             return self;
         };
         _this.fetch = function () {
-            _this.configs
-                .pipe(operators_1.mergeMap(function (configs) { return configs; }), operators_1.map(function (config) {
+            rxjs_1.from(_this.configs)
+                .pipe(operators_1.map(function (config) {
                 var state = _this.state$.getValue()[config.requestId];
                 return new rxjs_1.Observable(function (observer) {
                     return new RequestSubscriber_1["default"](observer, config, state);
@@ -102,6 +109,7 @@ var MultiObservable = /** @class */ (function (_super) {
             }))
                 .forEach(function (result) { return _this.state$.next(result); });
         };
+        _this.configs = [];
         _this.configure = _this.configure.bind(_this);
         _this.subscriberConfigListener = _this.subscriberConfigListener.bind(_this);
         _this.getInitialState = _this.getInitialState.bind(_this);
