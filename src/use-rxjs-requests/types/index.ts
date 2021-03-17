@@ -4,6 +4,8 @@ import SingleObservable from "../Observables/single";
 
 export interface RxRequestsSubscriberConfig {
   fetchOnMount?: boolean;
+  fetchOnUpdateConfigs?: boolean;
+  fetchOnUpdateConfig?: boolean;
   refetchInterval?: number;
 }
 

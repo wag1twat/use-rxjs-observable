@@ -6,23 +6,29 @@ import {
   RxRequestsSubscriberConfig,
   UseRxRequestValue,
 } from "../types";
-import { useDeepCompareEffect } from "react-use";
+import { useDeepCompareEffect, createMemo } from "react-use";
 
 export default function useRxJsRequest<Data = any, Error = any>(
   config: RxRequestConfig,
   subscriberConfig: RxRequestsSubscriberConfig = {}
 ): UseRxRequestValue<Data, Error> {
+  const _config = createMemo((config) => config)(config);
+
+  const _subscriberConfig = createMemo((subscriberConfig) => subscriberConfig)(
+    subscriberConfig
+  );
+
   const [state, setState] = useState<Partial<RxRequestResult<Data, Error>>>({});
 
   const observable = useMemo(() => new SingleObservable<Data, Error>(), []);
 
   useDeepCompareEffect(() => {
-    const subscription = observable
-      .configure(config, subscriberConfig)
-      .subscribe(setState);
+    observable.configure(_config, _subscriberConfig);
+
+    const subscription = observable.subscribe(setState);
 
     return () => subscription.unsubscribe();
-  }, [observable, config, subscriberConfig, setState]);
+  }, [observable, _config, _subscriberConfig, setState]);
 
   return {
     state,

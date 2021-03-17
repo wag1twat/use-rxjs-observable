@@ -41,9 +41,12 @@ var SingleObservable = /** @class */ (function (_super) {
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.subscriberConfig.subscribe(_this.subscriberConfigListener(observer)));
         }) || this;
+        // @ts-ignore //TODO: thinking for typing
         _this.config = new rxjs_1.BehaviorSubject({});
         _this.subscriberConfig = new rxjs_1.BehaviorSubject({});
+        // @ts-ignore //TODO: thinking for typing
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
+        // @ts-ignore //TODO: thinking for typing
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
             var config = _this.config.getValue();

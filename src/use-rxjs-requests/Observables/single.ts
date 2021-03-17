@@ -19,6 +19,7 @@ import { IdleRequest } from "../utils/Results";
 export default class SingleObservable<Data, Error> extends Observable<
   RxRequestResult<Data, Error>
 > {
+  // @ts-ignore //TODO: thinking for typing
   private config: BehaviorSubject<RxMutableRequestConfig> = new BehaviorSubject(
     {}
   );
@@ -26,11 +27,11 @@ export default class SingleObservable<Data, Error> extends Observable<
   private subscriberConfig: BehaviorSubject<RxRequestsSubscriberConfig> = new BehaviorSubject(
     {}
   );
-
+  // @ts-ignore //TODO: thinking for typing
   private initialState$: BehaviorSubject<
     RxRequestResult<Data, Error>
   > = new BehaviorSubject({});
-
+  // @ts-ignore //TODO: thinking for typing
   private state$: BehaviorSubject<
     RxRequestResult<Data, Error>
   > = new BehaviorSubject({});

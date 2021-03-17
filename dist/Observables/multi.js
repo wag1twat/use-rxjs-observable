@@ -43,7 +43,9 @@ var MultiObservable = /** @class */ (function (_super) {
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.subscriberConfig.subscribe(_this.subscriberConfigListener(observer)));
         }) || this;
+        // @ts-ignore //TODO: thinking for typing
         _this.configs = new rxjs_1.BehaviorSubject([]);
+        // @ts-ignore //TODO: thinking for typing
         _this.subscriberConfig = new rxjs_1.BehaviorSubject({ fetchOnMount: false, refetchInterval: undefined });
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});

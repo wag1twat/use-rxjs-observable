@@ -1,4 +1,4 @@
-import { BehaviorSubject, interval, Observable, Subscriber } from "rxjs";
+import { BehaviorSubject, interval, Observable, Subscriber, from } from "rxjs";
 import RequestSubscriber from "../RequestSubscriber";
 import {
   RxRequestResult,
@@ -27,12 +27,13 @@ import { IdleRequest } from "../utils/Results";
 export default class MultiObservable<Data, Error> extends Observable<
   RxRequestResult<Data, Error>[]
 > {
-  private configs: BehaviorSubject<
-    RxMutableRequestConfig[]
-  > = new BehaviorSubject([]);
-
+  // @ts-ignore //TODO: thinking for typing
   private subscriberConfig: BehaviorSubject<RxRequestsSubscriberConfig> = new BehaviorSubject(
-    { fetchOnMount: false, refetchInterval: undefined }
+    {
+      fetchOnMount: false,
+      refetchInterval: undefined,
+      fetchOnUpdateConfigs: undefined,
+    }
   );
 
   private initialState$: BehaviorSubject<{
@@ -42,6 +43,8 @@ export default class MultiObservable<Data, Error> extends Observable<
   private state$: BehaviorSubject<{
     [key: string]: RxRequestResult<Data, Error>;
   }> = new BehaviorSubject({});
+
+  private configs: RxMutableRequestConfig[];
 
   constructor() {
     super((observer) => {
@@ -54,7 +57,19 @@ export default class MultiObservable<Data, Error> extends Observable<
       observer.add(
         this.subscriberConfig.subscribe(this.subscriberConfigListener(observer))
       );
+
+      observer.add(
+        from(this.configs)
+          .pipe(
+            takeWhile(() =>
+              Boolean(this.subscriberConfig.getValue().fetchOnUpdateConfigs)
+            )
+          )
+          .subscribe(() => this.fetch())
+      );
     });
+
+    this.configs = [];
 
     this.configure = this.configure.bind(this);
     this.subscriberConfigListener = this.subscriberConfigListener.bind(this);
@@ -66,7 +81,7 @@ export default class MultiObservable<Data, Error> extends Observable<
 
   private getInitialState = () => {
     return LodashReduce(
-      this.configs.getValue(),
+      this.configs,
       (acc, mutableRequestConfig) => {
         return {
           ...acc,
@@ -116,12 +131,10 @@ export default class MultiObservable<Data, Error> extends Observable<
     configs,
     subscriberConfig
   ) => {
-    this.configs.next(
-      LodashMap(configs, (config) => ({
-        ...config,
-        requestId: v4() + "-xhr-id",
-      }))
-    );
+    this.configs = LodashMap(configs, (config) => ({
+      ...config,
+      requestId: v4() + "-xhr-id",
+    }));
 
     this.subscriberConfig.next(subscriberConfig);
 
@@ -131,9 +144,8 @@ export default class MultiObservable<Data, Error> extends Observable<
   };
 
   public fetch = () => {
-    this.configs
+    from(this.configs)
       .pipe(
-        mergeMap((configs) => configs),
         map((config) => {
           const state = this.state$.getValue()[config.requestId];
           return new Observable<RxRequestResult<Data, Error>>(
