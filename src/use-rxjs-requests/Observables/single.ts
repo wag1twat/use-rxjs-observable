@@ -5,6 +5,7 @@ import {
   SingleObservableConfigure,
   RxRequestsSubscriberConfig,
   RxMutableRequestConfig,
+  UseRxRequestFetchFn,
 } from "../types";
 import { v4 } from "uuid";
 import {
@@ -103,9 +104,32 @@ export default class SingleObservable<Data, Error> extends Observable<
     return self;
   };
 
-  public fetch = () => {
+  public fetch: UseRxRequestFetchFn = (_config?) => {
     const self = this;
-    this.config
+
+    if (_config) {
+      return this.config
+        .pipe(
+          map((config) => {
+            const state = self.state$.getValue();
+            return new Observable<RxRequestResult<Data, Error>>(
+              (observer) =>
+                new RequestSubscriber<Data, Error>(
+                  observer,
+                  { ...config, ..._config },
+                  state
+                )
+            );
+          }),
+          mergeMap((v) => v),
+          distinctUntilKeyChanged("status")
+        )
+        .forEach((result) => {
+          this.state$.next(result);
+        });
+    }
+
+    return this.config
       .pipe(
         map((config) => {
           const state = self.state$.getValue();

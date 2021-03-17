@@ -73,9 +73,21 @@ var SingleObservable = /** @class */ (function (_super) {
             var self = _this;
             return self;
         };
-        _this.fetch = function () {
+        _this.fetch = function (_config) {
             var self = _this;
-            _this.config
+            if (_config) {
+                return _this.config
+                    .pipe(operators_1.map(function (config) {
+                    var state = self.state$.getValue();
+                    return new rxjs_1.Observable(function (observer) {
+                        return new RequestSubscriber_1["default"](observer, __assign(__assign({}, config), _config), state);
+                    });
+                }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilKeyChanged("status"))
+                    .forEach(function (result) {
+                    _this.state$.next(result);
+                });
+            }
+            return _this.config
                 .pipe(operators_1.map(function (config) {
                 var state = self.state$.getValue();
                 return new rxjs_1.Observable(function (observer) {
