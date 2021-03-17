@@ -1,6 +1,6 @@
-import useRxRequests from "./dist/useRxJsRequests";
-import useRxRequest from "./dist/useRxJsRequest";
 import {
+  useRxRequest,
+  useRxRequests,
   RxRequestConfig,
   RxRequestsSubscriberConfig,
   RxRequestResult,
@@ -9,7 +9,7 @@ import {
   SingleObservableConfigure,
   UseRxRequestValue,
   UseRxRequestsValue,
-} from "./dist/types";
+} from "./dist";
 
 export type {
   RxRequestConfig,
