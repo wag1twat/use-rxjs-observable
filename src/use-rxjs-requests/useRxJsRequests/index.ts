@@ -1,22 +1,44 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useMemo, useState } from "react";
 import MultiObservable from "../Observables/multi";
 import {
   RxRequestConfig,
   RxRequestResult,
-  RxRequestsSubscriberConfig,
+  MultiRxObservableConfig,
   UseRxRequestsValue,
 } from "../types";
-import { useDeepCompareEffect, createMemo } from "react-use";
+import { useDeepCompareEffect } from "react-use";
 
 export default function useRxJsRequests<Data = any, Error = any>(
   configs: RxRequestConfig[],
-  subscriberConfig: RxRequestsSubscriberConfig = {}
+  {
+    fetchOnUpdateConfigs,
+    fetchOnUpdateConfig,
+    refetchInterval,
+    fetchOnMount,
+    onSuccess,
+    onError,
+  }: MultiRxObservableConfig<Data, Error> = {}
 ): UseRxRequestsValue<Data, Error> {
-  const _configs = createMemo((configs) => configs)(configs);
+  const configsMemo = useMemo(() => configs, [configs]);
 
-  const _subscriberConfig = createMemo((subscriberConfig) => subscriberConfig)(
-    subscriberConfig
-  );
+  const subscriberConfigMemo = useMemo(() => {
+    return {
+      fetchOnUpdateConfigs,
+      fetchOnUpdateConfig,
+      refetchInterval,
+      fetchOnMount,
+      onSuccess,
+      onError,
+    };
+  }, [
+    fetchOnUpdateConfigs,
+    fetchOnUpdateConfig,
+    refetchInterval,
+    fetchOnMount,
+    Boolean(onSuccess),
+    Boolean(onError),
+  ]);
 
   const [state, setState] = useState<RxRequestResult<Data, Error>[]>([]);
 
@@ -24,11 +46,11 @@ export default function useRxJsRequests<Data = any, Error = any>(
 
   useDeepCompareEffect(() => {
     const subscription = observable
-      .configure(_configs, _subscriberConfig)
+      .configure(configsMemo, subscriberConfigMemo)
       .subscribe(setState);
 
     return () => subscription.unsubscribe();
-  }, [observable, _configs, _subscriberConfig, setState]);
+  }, [observable, configsMemo, subscriberConfigMemo, setState]);
 
   return {
     state,

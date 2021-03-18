@@ -1,11 +1,16 @@
-import { BehaviorSubject, interval, Observable, Subscriber } from "rxjs";
+import { BehaviorSubject, interval, Observable } from "rxjs";
 import RequestSubscriber from "../RequestSubscriber";
 import {
   RxRequestResult,
-  SingleObservableConfigure,
-  RxRequestsSubscriberConfig,
+  SingleRxObservableConfigure,
+  SingleRxObservableConfig,
   RxMutableRequestConfig,
   UseRxRequestFetchFn,
+  OnSuccessUseRxRequest,
+  OnErrorUseRxRequest,
+  SingleRxObservableConfigListener,
+  SingleRxObservableStateListener,
+  SingleRxObservableState,
 } from "../types";
 import { v4 } from "uuid";
 import {
@@ -15,27 +20,29 @@ import {
   startWith,
   takeWhile,
 } from "rxjs/operators";
-import { IdleRequest } from "../utils/Results";
+import { ErrorRequest, IdleRequest, SuccessRequest } from "../utils/Results";
 
 export default class SingleObservable<Data, Error> extends Observable<
   RxRequestResult<Data, Error>
 > {
-  // @ts-ignore //TODO: thinking for typing
   private config: BehaviorSubject<RxMutableRequestConfig> = new BehaviorSubject(
-    {}
+    {} as RxMutableRequestConfig
   );
 
-  private subscriberConfig: BehaviorSubject<RxRequestsSubscriberConfig> = new BehaviorSubject(
-    {}
-  );
-  // @ts-ignore //TODO: thinking for typing
+  private singleRxObservableConfig: BehaviorSubject<
+    SingleRxObservableConfig<Data, Error>
+  > = new BehaviorSubject({});
+
   private initialState$: BehaviorSubject<
-    RxRequestResult<Data, Error>
-  > = new BehaviorSubject({});
-  // @ts-ignore //TODO: thinking for typing
+    SingleRxObservableState<Data, Error>
+  > = new BehaviorSubject({} as SingleRxObservableState<Data, Error>);
   private state$: BehaviorSubject<
-    RxRequestResult<Data, Error>
-  > = new BehaviorSubject({});
+    SingleRxObservableState<Data, Error>
+  > = new BehaviorSubject({} as SingleRxObservableState<Data, Error>);
+
+  private onSuccess?: OnSuccessUseRxRequest<Data>;
+
+  private onError?: OnErrorUseRxRequest<Error>;
 
   constructor() {
     super((observer) => {
@@ -43,15 +50,30 @@ export default class SingleObservable<Data, Error> extends Observable<
 
       observer.add(this.initialState$.subscribe(this.initialStateListener));
 
+      observer.add(
+        this.state$.subscribe((state) => {
+          if (this.onSuccess && state.status === "success") {
+            this.onSuccess(state as SuccessRequest<Data>);
+          }
+          if (this.onError && state.status === "error") {
+            this.onError(state as ErrorRequest<Error>);
+          }
+        })
+      );
+
       this.initialState$.next(this.getInitialState());
 
       observer.add(
-        this.subscriberConfig.subscribe(this.subscriberConfigListener(observer))
+        this.singleRxObservableConfig.subscribe(
+          this.singleRxObservableConfigListener(observer)
+        )
       );
     });
 
     this.configure = this.configure.bind(this);
-    this.subscriberConfigListener = this.subscriberConfigListener.bind(this);
+    this.singleRxObservableConfigListener = this.singleRxObservableConfigListener.bind(
+      this
+    );
     this.getInitialState = this.getInitialState.bind(this);
     this.initialStateListener = this.initialStateListener.bind(this);
     this.stateListener = this.stateListener.bind(this);
@@ -63,17 +85,19 @@ export default class SingleObservable<Data, Error> extends Observable<
     return new IdleRequest(config.requestId, config);
   };
 
-  private initialStateListener = (initialState: RxRequestResult<Data, Error>) =>
-    this.state$.next(initialState);
+  private initialStateListener = (
+    initialState: SingleRxObservableState<Data, Error>
+  ) => this.state$.next(initialState);
 
-  private stateListener = (
-    observer: Subscriber<RxRequestResult<Data, Error>>
-  ) => (state: RxRequestResult<Data, Error>) => observer.next(state);
+  private stateListener: SingleRxObservableStateListener<Data, Error> = (
+    observer
+  ) => (state) => observer.next(state);
 
-  private subscriberConfigListener = (
-    observer: Subscriber<RxRequestResult<Data, Error>>
-  ) => (subscriberConfig: RxRequestsSubscriberConfig) => {
-    const { fetchOnMount, refetchInterval } = subscriberConfig;
+  private singleRxObservableConfigListener: SingleRxObservableConfigListener<
+    Data,
+    Error
+  > = (observer) => (singleRxObservableConfig) => {
+    const { fetchOnMount, refetchInterval } = singleRxObservableConfig;
 
     if (fetchOnMount && !refetchInterval) {
       this.fetch();
@@ -91,13 +115,19 @@ export default class SingleObservable<Data, Error> extends Observable<
     }
   };
 
-  public configure: SingleObservableConfigure<Data, Error> = (
+  public configure: SingleRxObservableConfigure<Data, Error> = (
     config,
-    subscriberConfig
+    singleRxObservableConfig,
+    onSuccess,
+    onError
   ) => {
     this.config.next({ ...config, requestId: v4() });
 
-    this.subscriberConfig.next(subscriberConfig);
+    this.singleRxObservableConfig.next(singleRxObservableConfig);
+
+    this.onSuccess = onSuccess;
+
+    this.onError = onError;
 
     const self = this;
 

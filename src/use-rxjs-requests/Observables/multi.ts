@@ -1,10 +1,15 @@
-import { BehaviorSubject, interval, Observable, Subscriber, from } from "rxjs";
+import { BehaviorSubject, interval, Observable, from } from "rxjs";
 import RequestSubscriber from "../RequestSubscriber";
 import {
   RxRequestResult,
-  MultiObservableConfigure,
-  RxRequestsSubscriberConfig,
+  MultiRxObservableConfigure,
+  MultiRxObservableConfig,
   RxMutableRequestConfig,
+  OnSuccessUseRxRequests,
+  OnErrorUseRxRequests,
+  MultiRxObservableConfigListener,
+  MultiRxObservableStateListener,
+  MultiRxObservableState,
 } from "../types";
 import {
   map as LodashMap,
@@ -22,29 +27,28 @@ import {
   takeWhile,
 } from "rxjs/operators";
 import { arraysOfObjectsEqual } from "../utils/equals";
-import { IdleRequest } from "../utils/Results";
+import { ErrorRequest, IdleRequest, SuccessRequest } from "../utils/Results";
 
 export default class MultiObservable<Data, Error> extends Observable<
   RxRequestResult<Data, Error>[]
 > {
-  // @ts-ignore //TODO: thinking for typing
-  private subscriberConfig: BehaviorSubject<RxRequestsSubscriberConfig> = new BehaviorSubject(
-    {
-      fetchOnMount: false,
-      refetchInterval: undefined,
-      fetchOnUpdateConfigs: undefined,
-    }
-  );
+  private configs: RxMutableRequestConfig[] = [];
 
-  private initialState$: BehaviorSubject<{
-    [key: string]: RxRequestResult<Data, Error>;
-  }> = new BehaviorSubject({});
+  private multiRxObservableConfig: BehaviorSubject<
+    MultiRxObservableConfig<Data, Error>
+  > = new BehaviorSubject({});
 
-  private state$: BehaviorSubject<{
-    [key: string]: RxRequestResult<Data, Error>;
-  }> = new BehaviorSubject({});
+  private initialState$: BehaviorSubject<
+    MultiRxObservableState<Data, Error>
+  > = new BehaviorSubject({});
 
-  private configs: RxMutableRequestConfig[];
+  private state$: BehaviorSubject<
+    MultiRxObservableState<Data, Error>
+  > = new BehaviorSubject({});
+
+  private onSuccess?: OnSuccessUseRxRequests<Data>;
+
+  private onError?: OnErrorUseRxRequests<Error>;
 
   constructor() {
     super((observer) => {
@@ -52,27 +56,56 @@ export default class MultiObservable<Data, Error> extends Observable<
 
       observer.add(this.initialState$.subscribe(this.initialStateListener));
 
+      observer.add(
+        this.state$
+          .pipe(
+            map((v) => LodashValues(v)),
+            map((v) => v),
+            filter((v) =>
+              v.every((r) => r.status !== "idle" && r.status !== "loading")
+            ),
+            map((v) => {
+              return {
+                success: v.filter((r) => r.status === "success"),
+                error: v.filter((r) => r.status === "error"),
+              };
+            })
+          )
+          .subscribe(({ success, error }) => {
+            if (this.onSuccess) {
+              this.onSuccess(success as SuccessRequest<Data>[]);
+            }
+            if (this.onError) {
+              this.onError(error as ErrorRequest<Error>[]);
+            }
+          })
+      );
+
       this.initialState$.next(this.getInitialState());
 
       observer.add(
-        this.subscriberConfig.subscribe(this.subscriberConfigListener(observer))
+        this.multiRxObservableConfig.subscribe(
+          this.multiRxObservableConfigListener(observer)
+        )
       );
 
       observer.add(
         from(this.configs)
           .pipe(
             takeWhile(() =>
-              Boolean(this.subscriberConfig.getValue().fetchOnUpdateConfigs)
+              Boolean(
+                this.multiRxObservableConfig.getValue().fetchOnUpdateConfigs
+              )
             )
           )
           .subscribe(() => this.fetch())
       );
     });
 
-    this.configs = [];
-
     this.configure = this.configure.bind(this);
-    this.subscriberConfigListener = this.subscriberConfigListener.bind(this);
+    this.multiRxObservableConfigListener = this.multiRxObservableConfigListener.bind(
+      this
+    );
     this.getInitialState = this.getInitialState.bind(this);
     this.initialStateListener = this.initialStateListener.bind(this);
     this.stateListener = this.stateListener.bind(this);
@@ -95,18 +128,29 @@ export default class MultiObservable<Data, Error> extends Observable<
     );
   };
 
-  private initialStateListener = (initialState: {
-    [key: string]: RxRequestResult<Data, Error>;
-  }) => this.state$.next(initialState);
+  private initialStateListener = (
+    initialState: MultiRxObservableState<Data, Error>
+  ) => this.state$.next(initialState);
 
-  private stateListener = (
-    observer: Subscriber<RxRequestResult<Data, Error>[]>
-  ) => (state: { [key: string]: RxRequestResult<Data, Error> }) =>
-    observer.next(LodashValues(state));
+  private stateListener: MultiRxObservableStateListener<Data, Error> = (
+    observer
+  ) => (state) => observer.next(LodashValues(state));
 
-  private subscriberConfigListener = (
-    observer: Subscriber<RxRequestResult<Data, Error>[]>
-  ) => ({ fetchOnMount, refetchInterval }: RxRequestsSubscriberConfig) => {
+  private multiRxObservableConfigListener: MultiRxObservableConfigListener<
+    Data,
+    Error
+  > = (observer) => (multiRxObservableConfig) => {
+    const {
+      fetchOnMount,
+      refetchInterval,
+      onSuccess,
+      onError,
+    } = multiRxObservableConfig;
+
+    this.onSuccess = onSuccess;
+
+    this.onError = onError;
+
     if (fetchOnMount && !refetchInterval) {
       this.fetch();
     }
@@ -127,16 +171,16 @@ export default class MultiObservable<Data, Error> extends Observable<
     }
   };
 
-  public configure: MultiObservableConfigure<Data, Error> = (
+  public configure: MultiRxObservableConfigure<Data, Error> = (
     configs,
-    subscriberConfig
+    multiRxObservableConfig
   ) => {
     this.configs = LodashMap(configs, (config) => ({
       ...config,
       requestId: v4() + "-xhr-id",
     }));
 
-    this.subscriberConfig.next(subscriberConfig);
+    this.multiRxObservableConfig.next(multiRxObservableConfig);
 
     const self = this;
 
@@ -154,14 +198,12 @@ export default class MultiObservable<Data, Error> extends Observable<
           );
         }),
         mergeMap((observable) => observable),
-        scan<
-          RxRequestResult<Data, Error>,
-          {
-            [key: string]: RxRequestResult<Data, Error>;
-          }
-        >((acc, requestResult) => {
-          return { ...acc, [requestResult.requestId]: requestResult };
-        }, this.state$.getValue()),
+        scan<RxRequestResult<Data, Error>, MultiRxObservableState<Data, Error>>(
+          (acc, requestResult) => {
+            return { ...acc, [requestResult.requestId]: requestResult };
+          },
+          this.state$.getValue()
+        ),
         map((v) => LodashValues(v)),
         pairwise(),
         filter(([prev, next]) => !arraysOfObjectsEqual(prev, next)),
