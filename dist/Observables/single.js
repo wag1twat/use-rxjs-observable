@@ -38,14 +38,6 @@ var SingleObservable = /** @class */ (function (_super) {
         var _this = _super.call(this, function (observer) {
             observer.add(_this.state$.subscribe(_this.stateListener(observer)));
             observer.add(_this.initialState$.subscribe(_this.initialStateListener));
-            observer.add(_this.state$.subscribe(function (state) {
-                if (_this.onSuccess && state.status === "success") {
-                    _this.onSuccess(state);
-                }
-                if (_this.onError && state.status === "error") {
-                    _this.onError(state);
-                }
-            }));
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.singleRxObservableConfig.subscribe(_this.singleRxObservableConfigListener(observer)));
         }) || this;
@@ -70,11 +62,9 @@ var SingleObservable = /** @class */ (function (_super) {
                     .subscribe(function () { return _this.fetch(); }));
             }
         }; };
-        _this.configure = function (config, singleRxObservableConfig, onSuccess, onError) {
+        _this.configure = function (config, singleRxObservableConfig) {
             _this.config.next(__assign(__assign({}, config), { requestId: uuid_1.v4() }));
             _this.singleRxObservableConfig.next(singleRxObservableConfig);
-            _this.onSuccess = onSuccess;
-            _this.onError = onError;
             var self = _this;
             return self;
         };

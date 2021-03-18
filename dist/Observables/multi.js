@@ -40,24 +40,6 @@ var MultiObservable = /** @class */ (function (_super) {
         var _this = _super.call(this, function (observer) {
             observer.add(_this.state$.subscribe(_this.stateListener(observer)));
             observer.add(_this.initialState$.subscribe(_this.initialStateListener));
-            observer.add(_this.state$
-                .pipe(operators_1.map(function (v) { return lodash_1.values(v); }), operators_1.map(function (v) { return v; }), operators_1.filter(function (v) {
-                return v.every(function (r) { return r.status !== "idle" && r.status !== "loading"; });
-            }), operators_1.map(function (v) {
-                return {
-                    success: v.filter(function (r) { return r.status === "success"; }),
-                    error: v.filter(function (r) { return r.status === "error"; })
-                };
-            }))
-                .subscribe(function (_a) {
-                var success = _a.success, error = _a.error;
-                if (_this.onSuccess) {
-                    _this.onSuccess(success);
-                }
-                if (_this.onError) {
-                    _this.onError(error);
-                }
-            }));
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.multiRxObservableConfig.subscribe(_this.multiRxObservableConfigListener(observer)));
             observer.add(rxjs_1.from(_this.configs)
@@ -79,9 +61,7 @@ var MultiObservable = /** @class */ (function (_super) {
         _this.initialStateListener = function (initialState) { return _this.state$.next(initialState); };
         _this.stateListener = function (observer) { return function (state) { return observer.next(lodash_1.values(state)); }; };
         _this.multiRxObservableConfigListener = function (observer) { return function (multiRxObservableConfig) {
-            var fetchOnMount = multiRxObservableConfig.fetchOnMount, refetchInterval = multiRxObservableConfig.refetchInterval, onSuccess = multiRxObservableConfig.onSuccess, onError = multiRxObservableConfig.onError;
-            _this.onSuccess = onSuccess;
-            _this.onError = onError;
+            var fetchOnMount = multiRxObservableConfig.fetchOnMount, refetchInterval = multiRxObservableConfig.refetchInterval;
             if (fetchOnMount && !refetchInterval) {
                 _this.fetch();
             }

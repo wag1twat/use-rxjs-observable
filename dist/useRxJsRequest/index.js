@@ -7,34 +7,30 @@ exports.__esModule = true;
 var react_1 = require("react");
 var single_1 = __importDefault(require("../Observables/single"));
 var react_use_1 = require("react-use");
+var useCallbacks_1 = require("./useCallbacks");
 function useRxJsRequest(config, _a) {
     var _b = _a === void 0 ? {} : _a, fetchOnUpdateConfigs = _b.fetchOnUpdateConfigs, fetchOnUpdateConfig = _b.fetchOnUpdateConfig, refetchInterval = _b.refetchInterval, fetchOnMount = _b.fetchOnMount, onSuccess = _b.onSuccess, onError = _b.onError;
     var configMemo = react_1.useMemo(function () { return config; }, [config]);
-    var subscriberConfigMemo = react_1.useMemo(function () {
-        return {
+    var _c = react_1.useState({}), state = _c[0], setState = _c[1];
+    var observable = react_1.useMemo(function () { return new single_1["default"](); }, []);
+    react_use_1.useDeepCompareEffect(function () {
+        observable.configure(configMemo, {
             fetchOnUpdateConfigs: fetchOnUpdateConfigs,
             fetchOnUpdateConfig: fetchOnUpdateConfig,
             refetchInterval: refetchInterval,
-            fetchOnMount: fetchOnMount,
-            onSuccess: onSuccess,
-            onError: onError
-        };
+            fetchOnMount: fetchOnMount
+        });
+        var subscription = observable.subscribe(setState);
+        return function () { return subscription.unsubscribe(); };
     }, [
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        observable,
+        configMemo,
         fetchOnUpdateConfigs,
         fetchOnUpdateConfig,
         refetchInterval,
         fetchOnMount,
-        Boolean(onSuccess),
-        Boolean(onError),
     ]);
-    var _c = react_1.useState({}), state = _c[0], setState = _c[1];
-    var observable = react_1.useMemo(function () { return new single_1["default"](); }, []);
-    react_use_1.useDeepCompareEffect(function () {
-        observable.configure(configMemo, subscriberConfigMemo);
-        var subscription = observable.subscribe(setState);
-        return function () { return subscription.unsubscribe(); };
-    }, [observable, configMemo, subscriberConfigMemo, setState]);
+    useCallbacks_1.useSingleCallbacks(state, onSuccess, onError);
     return {
         state: state,
         fetch: observable.fetch

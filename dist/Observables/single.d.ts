@@ -5,8 +5,6 @@ export default class SingleObservable<Data, Error> extends Observable<RxRequestR
     private singleRxObservableConfig;
     private initialState$;
     private state$;
-    private onSuccess?;
-    private onError?;
     constructor();
     private getInitialState;
     private initialStateListener;
