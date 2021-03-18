@@ -1,15 +1,17 @@
 import { Observable } from "rxjs";
-import { RxRequestResult, MultiObservableConfigure } from "../types";
+import { RxRequestResult, MultiRxObservableConfigure } from "../types";
 export default class MultiObservable<Data, Error> extends Observable<RxRequestResult<Data, Error>[]> {
-    private subscriberConfig;
+    private configs;
+    private multiRxObservableConfig;
     private initialState$;
     private state$;
-    private configs;
+    private onSuccess?;
+    private onError?;
     constructor();
     private getInitialState;
     private initialStateListener;
     private stateListener;
-    private subscriberConfigListener;
-    configure: MultiObservableConfigure<Data, Error>;
+    private multiRxObservableConfigListener;
+    configure: MultiRxObservableConfigure<Data, Error>;
     fetch: () => void;
 }

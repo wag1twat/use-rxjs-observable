@@ -40,20 +40,34 @@ var MultiObservable = /** @class */ (function (_super) {
         var _this = _super.call(this, function (observer) {
             observer.add(_this.state$.subscribe(_this.stateListener(observer)));
             observer.add(_this.initialState$.subscribe(_this.initialStateListener));
+            observer.add(_this.state$
+                .pipe(operators_1.map(function (v) { return lodash_1.values(v); }), operators_1.map(function (v) { return v; }), operators_1.filter(function (v) {
+                return v.every(function (r) { return r.status !== "idle" && r.status !== "loading"; });
+            }), operators_1.map(function (v) {
+                return {
+                    success: v.filter(function (r) { return r.status === "success"; }),
+                    error: v.filter(function (r) { return r.status === "error"; })
+                };
+            }))
+                .subscribe(function (_a) {
+                var success = _a.success, error = _a.error;
+                if (_this.onSuccess) {
+                    _this.onSuccess(success);
+                }
+                if (_this.onError) {
+                    _this.onError(error);
+                }
+            }));
             _this.initialState$.next(_this.getInitialState());
-            observer.add(_this.subscriberConfig.subscribe(_this.subscriberConfigListener(observer)));
+            observer.add(_this.multiRxObservableConfig.subscribe(_this.multiRxObservableConfigListener(observer)));
             observer.add(rxjs_1.from(_this.configs)
                 .pipe(operators_1.takeWhile(function () {
-                return Boolean(_this.subscriberConfig.getValue().fetchOnUpdateConfigs);
+                return Boolean(_this.multiRxObservableConfig.getValue().fetchOnUpdateConfigs);
             }))
                 .subscribe(function () { return _this.fetch(); }));
         }) || this;
-        // @ts-ignore //TODO: thinking for typing
-        _this.subscriberConfig = new rxjs_1.BehaviorSubject({
-            fetchOnMount: false,
-            refetchInterval: undefined,
-            fetchOnUpdateConfigs: undefined
-        });
+        _this.configs = [];
+        _this.multiRxObservableConfig = new rxjs_1.BehaviorSubject({});
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
@@ -63,11 +77,11 @@ var MultiObservable = /** @class */ (function (_super) {
             }, {});
         };
         _this.initialStateListener = function (initialState) { return _this.state$.next(initialState); };
-        _this.stateListener = function (observer) { return function (state) {
-            return observer.next(lodash_1.values(state));
-        }; };
-        _this.subscriberConfigListener = function (observer) { return function (_a) {
-            var fetchOnMount = _a.fetchOnMount, refetchInterval = _a.refetchInterval;
+        _this.stateListener = function (observer) { return function (state) { return observer.next(lodash_1.values(state)); }; };
+        _this.multiRxObservableConfigListener = function (observer) { return function (multiRxObservableConfig) {
+            var fetchOnMount = multiRxObservableConfig.fetchOnMount, refetchInterval = multiRxObservableConfig.refetchInterval, onSuccess = multiRxObservableConfig.onSuccess, onError = multiRxObservableConfig.onError;
+            _this.onSuccess = onSuccess;
+            _this.onError = onError;
             if (fetchOnMount && !refetchInterval) {
                 _this.fetch();
             }
@@ -79,9 +93,9 @@ var MultiObservable = /** @class */ (function (_super) {
                     .subscribe(function () { return _this.fetch(); }));
             }
         }; };
-        _this.configure = function (configs, subscriberConfig) {
+        _this.configure = function (configs, multiRxObservableConfig) {
             _this.configs = lodash_1.map(configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); });
-            _this.subscriberConfig.next(subscriberConfig);
+            _this.multiRxObservableConfig.next(multiRxObservableConfig);
             var self = _this;
             return self;
         };
@@ -109,9 +123,8 @@ var MultiObservable = /** @class */ (function (_super) {
             }))
                 .forEach(function (result) { return _this.state$.next(result); });
         };
-        _this.configs = [];
         _this.configure = _this.configure.bind(_this);
-        _this.subscriberConfigListener = _this.subscriberConfigListener.bind(_this);
+        _this.multiRxObservableConfigListener = _this.multiRxObservableConfigListener.bind(_this);
         _this.getInitialState = _this.getInitialState.bind(_this);
         _this.initialStateListener = _this.initialStateListener.bind(_this);
         _this.stateListener = _this.stateListener.bind(_this);

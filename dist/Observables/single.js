@@ -38,26 +38,29 @@ var SingleObservable = /** @class */ (function (_super) {
         var _this = _super.call(this, function (observer) {
             observer.add(_this.state$.subscribe(_this.stateListener(observer)));
             observer.add(_this.initialState$.subscribe(_this.initialStateListener));
+            observer.add(_this.state$.subscribe(function (state) {
+                if (_this.onSuccess && state.status === "success") {
+                    _this.onSuccess(state);
+                }
+                if (_this.onError && state.status === "error") {
+                    _this.onError(state);
+                }
+            }));
             _this.initialState$.next(_this.getInitialState());
-            observer.add(_this.subscriberConfig.subscribe(_this.subscriberConfigListener(observer)));
+            observer.add(_this.singleRxObservableConfig.subscribe(_this.singleRxObservableConfigListener(observer)));
         }) || this;
-        // @ts-ignore //TODO: thinking for typing
         _this.config = new rxjs_1.BehaviorSubject({});
-        _this.subscriberConfig = new rxjs_1.BehaviorSubject({});
-        // @ts-ignore //TODO: thinking for typing
+        _this.singleRxObservableConfig = new rxjs_1.BehaviorSubject({});
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
-        // @ts-ignore //TODO: thinking for typing
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
             var config = _this.config.getValue();
             return new Results_1.IdleRequest(config.requestId, config);
         };
-        _this.initialStateListener = function (initialState) {
-            return _this.state$.next(initialState);
-        };
+        _this.initialStateListener = function (initialState) { return _this.state$.next(initialState); };
         _this.stateListener = function (observer) { return function (state) { return observer.next(state); }; };
-        _this.subscriberConfigListener = function (observer) { return function (subscriberConfig) {
-            var fetchOnMount = subscriberConfig.fetchOnMount, refetchInterval = subscriberConfig.refetchInterval;
+        _this.singleRxObservableConfigListener = function (observer) { return function (singleRxObservableConfig) {
+            var fetchOnMount = singleRxObservableConfig.fetchOnMount, refetchInterval = singleRxObservableConfig.refetchInterval;
             if (fetchOnMount && !refetchInterval) {
                 _this.fetch();
             }
@@ -67,9 +70,11 @@ var SingleObservable = /** @class */ (function (_super) {
                     .subscribe(function () { return _this.fetch(); }));
             }
         }; };
-        _this.configure = function (config, subscriberConfig) {
+        _this.configure = function (config, singleRxObservableConfig, onSuccess, onError) {
             _this.config.next(__assign(__assign({}, config), { requestId: uuid_1.v4() }));
-            _this.subscriberConfig.next(subscriberConfig);
+            _this.singleRxObservableConfig.next(singleRxObservableConfig);
+            _this.onSuccess = onSuccess;
+            _this.onError = onError;
             var self = _this;
             return self;
         };
@@ -99,7 +104,7 @@ var SingleObservable = /** @class */ (function (_super) {
             });
         };
         _this.configure = _this.configure.bind(_this);
-        _this.subscriberConfigListener = _this.subscriberConfigListener.bind(_this);
+        _this.singleRxObservableConfigListener = _this.singleRxObservableConfigListener.bind(_this);
         _this.getInitialState = _this.getInitialState.bind(_this);
         _this.initialStateListener = _this.initialStateListener.bind(_this);
         _this.stateListener = _this.stateListener.bind(_this);
