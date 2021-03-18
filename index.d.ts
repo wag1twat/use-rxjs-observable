@@ -1,9 +1,49 @@
-<<<<<<< HEAD
-import useRxRequests from "./dist/useRxJsRequests";
-import useRxRequest from "./dist/useRxJsRequest";
-import { RxRequestConfig, RxRequestsSubscriberConfig, RxRequestResult, MultiObservableConfigure, RxMutableRequestConfig, SingleObservableConfigure, UseRxRequestValue, UseRxRequestsValue } from "./dist/types";
-=======
-import { useRxRequest, useRxRequests, RxRequestConfig, RxRequestsSubscriberConfig, RxRequestResult, MultiObservableConfigure, RxMutableRequestConfig, SingleObservableConfigure, UseRxRequestValue, UseRxRequestsValue } from "./dist";
->>>>>>> master
-export type { RxRequestConfig, RxRequestsSubscriberConfig, RxRequestResult, MultiObservableConfigure, RxMutableRequestConfig, SingleObservableConfigure, UseRxRequestValue, UseRxRequestsValue, };
+import {
+  useRxRequest,
+  useRxRequests,
+  BaseRxObservableConfig,
+  MultiRxObservableConfig,
+  SingleRxObservableConfigListener,
+  MultiRxObservableConfigListener,
+  SingleRxObservableStateListener,
+  MultiRxObservableStateListener,
+  SingleRxObservableConfig,
+  RxRequestConfig,
+  RxMutableRequestConfig,
+  RxRequestResult,
+  OnErrorUseRxRequests,
+  OnSuccessUseRxRequests,
+  OnSuccessUseRxRequest,
+  OnErrorUseRxRequest,
+  UseRxRequestsValue,
+  UseRxRequestFetchFn,
+  UseRxRequestValue,
+  MultiRxObservableConfigure,
+  SingleRxObservableConfigure,
+  SingleRxObservableState,
+  MultiRxObservableState,
+} from "./dist";
+export type {
+  BaseRxObservableConfig,
+  MultiRxObservableConfig,
+  SingleRxObservableConfigListener,
+  MultiRxObservableConfigListener,
+  SingleRxObservableStateListener,
+  MultiRxObservableStateListener,
+  SingleRxObservableConfig,
+  RxRequestConfig,
+  RxMutableRequestConfig,
+  RxRequestResult,
+  OnErrorUseRxRequests,
+  OnSuccessUseRxRequests,
+  OnSuccessUseRxRequest,
+  OnErrorUseRxRequest,
+  UseRxRequestsValue,
+  UseRxRequestFetchFn,
+  UseRxRequestValue,
+  MultiRxObservableConfigure,
+  SingleRxObservableConfigure,
+  SingleRxObservableState,
+  MultiRxObservableState,
+};
 export { useRxRequests, useRxRequest };
