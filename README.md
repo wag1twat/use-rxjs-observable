@@ -22,10 +22,10 @@ function App() {
     refetchInterval: undefined,
     fetchOnMount: false,
     fetchOnUpdateConfig: false,
-    onSuccess: (success) => {
+    onSuccess: (success) => { // success: SuccessRequest
       console.log("success", success);
       },
-    onError: (error) => {
+    onError: (error) => { // error: ErrorRequest
       console.log("error", error);
     },
   });
@@ -66,6 +66,12 @@ function App() {
     refetchInterval: undefined,
     fetchOnMount: false,
     fetchOnUpdateConfig: false,
+    onSuccess: (success) => { // success: SuccessRequest[]
+      console.log("success", success);
+      },
+    onError: (error) => { // error: ErrorRequest[]
+      console.log("error", error);
+    },
   });
 
   const { state, fetch } = useRxRequests(configs, options);
