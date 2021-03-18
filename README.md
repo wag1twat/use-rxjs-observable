@@ -22,6 +22,12 @@ function App() {
     refetchInterval: undefined,
     fetchOnMount: false,
     fetchOnUpdateConfig: false,
+    onSuccess: (success) => {
+      console.log("success", success);
+      },
+    onError: (error) => {
+      console.log("error", error);
+    },
   });
 
   const { state, fetch } = useRxRequest(config, options);
