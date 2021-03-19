@@ -39,6 +39,8 @@ var MultiObservable = /** @class */ (function (_super) {
     function MultiObservable() {
         var _this = _super.call(this, function (observer) {
             observer.add(_this.state$.subscribe(_this.stateListener(observer)));
+            observer.add(_this.initialState$.subscribe(_this.initialStateListener));
+            _this.initialState$.next(_this.getInitialState());
             observer.add(_this.state$
                 .pipe(operators_1.map(function (state) { return lodash_1.values(state); }), operators_1.filter(function (state) { return state.every(function (_a) {
                 var status = _a.status;
@@ -72,8 +74,6 @@ var MultiObservable = /** @class */ (function (_super) {
                     }
                 }
             }));
-            observer.add(_this.initialState$.subscribe(_this.initialStateListener));
-            _this.initialState$.next(_this.getInitialState());
             observer.add(_this.multiRxObservableConfig.subscribe(_this.multiRxObservableConfigListener(observer)));
             observer.add(rxjs_1.from(_this.configs)
                 .pipe(operators_1.takeWhile(function () {
