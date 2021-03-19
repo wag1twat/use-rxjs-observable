@@ -39,6 +39,39 @@ var MultiObservable = /** @class */ (function (_super) {
     function MultiObservable() {
         var _this = _super.call(this, function (observer) {
             observer.add(_this.state$.subscribe(_this.stateListener(observer)));
+            observer.add(_this.state$
+                .pipe(operators_1.map(function (state) { return lodash_1.values(state); }), operators_1.filter(function (state) { return state.every(function (_a) {
+                var status = _a.status;
+                return status !== "idle";
+            }); }), operators_1.filter(function (state) {
+                return state.every(function (_a) {
+                    var status = _a.status;
+                    return status !== "loading";
+                });
+            }), operators_1.concatMap(function (state) {
+                var successes = state.filter(function (_a) {
+                    var status = _a.status;
+                    return status === "success";
+                });
+                var errors = state.filter(function (_a) {
+                    var status = _a.status;
+                    return status === "error";
+                });
+                return rxjs_1.of({ successes: successes, errors: errors });
+            }), operators_1.distinctUntilChanged())
+                .subscribe(function (_a) {
+                var successes = _a.successes, errors = _a.errors;
+                if (_this.onSuccess) {
+                    if (successes.length) {
+                        _this.onSuccess(successes);
+                    }
+                }
+                if (_this.onError) {
+                    if (errors.length) {
+                        _this.onError(errors);
+                    }
+                }
+            }));
             observer.add(_this.initialState$.subscribe(_this.initialStateListener));
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.multiRxObservableConfig.subscribe(_this.multiRxObservableConfigListener(observer)));
@@ -73,18 +106,29 @@ var MultiObservable = /** @class */ (function (_super) {
                     .subscribe(function () { return _this.fetch(); }));
             }
         }; };
-        _this.configure = function (configs, multiRxObservableConfig) {
-            _this.configs = lodash_1.map(configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); });
-            _this.multiRxObservableConfig.next(multiRxObservableConfig);
-            var self = _this;
-            return self;
+        _this.configure = function (_a) {
+            var configs = _a.configs, refetchInterval = _a.refetchInterval, fetchOnUpdateConfigs = _a.fetchOnUpdateConfigs, fetchOnMount = _a.fetchOnMount, onSuccess = _a.onSuccess, onError = _a.onError;
+            if (configs) {
+                _this.configs = lodash_1.map(configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); });
+            }
+            if (onSuccess) {
+                _this.onSuccess = lodash_1.memoize(onSuccess);
+            }
+            if (onError) {
+                _this.onError = lodash_1.memoize(onError);
+            }
+            _this.multiRxObservableConfig.next({
+                refetchInterval: refetchInterval,
+                fetchOnMount: fetchOnMount,
+                fetchOnUpdateConfigs: fetchOnUpdateConfigs
+            });
         };
         _this.fetch = function () {
             rxjs_1.from(_this.configs)
                 .pipe(operators_1.map(function (config) {
                 var state = _this.state$.getValue()[config.requestId];
                 return new rxjs_1.Observable(function (observer) {
-                    return new RequestSubscriber_1["default"](observer, config, state);
+                    return new RequestSubscriber_1["default"](observer, __assign(__assign({}, config), { body: { uuid: uuid_1.v4(), body: { uuid: uuid_1.v4() } }, params: { uuid: uuid_1.v4(), params: { uuid: uuid_1.v4() } } }), state);
                 });
             }), operators_1.mergeMap(function (observable) { return observable; }), operators_1.scan(function (acc, requestResult) {
                 var _a;

@@ -1,6 +1,6 @@
+import useRxRequests from "./useRxJsRequests";
+import useRxRequest from "./useRxJsRequest";
 import {
-  useRxRequest,
-  useRxRequests,
   BaseRxObservableConfig,
   MultiRxObservableConfig,
   SingleRxObservableConfigListener,
@@ -22,7 +22,8 @@ import {
   SingleRxObservableConfigure,
   SingleRxObservableState,
   MultiRxObservableState,
-} from "./dist";
+} from "./types";
+
 export type {
   BaseRxObservableConfig,
   MultiRxObservableConfig,
@@ -46,4 +47,5 @@ export type {
   SingleRxObservableState,
   MultiRxObservableState,
 };
+
 export { useRxRequests, useRxRequest };

@@ -5,6 +5,8 @@ export default class MultiObservable<Data, Error> extends Observable<RxRequestRe
     private multiRxObservableConfig;
     private initialState$;
     private state$;
+    private onSuccess?;
+    private onError?;
     constructor();
     private getInitialState;
     private initialStateListener;

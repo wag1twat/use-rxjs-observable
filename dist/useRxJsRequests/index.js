@@ -7,32 +7,32 @@ exports.__esModule = true;
 var react_1 = require("react");
 var multi_1 = __importDefault(require("../Observables/multi"));
 var react_use_1 = require("react-use");
-var useCallbacks_1 = require("./useCallbacks");
 function useRxJsRequests(configs, _a) {
     var _b = _a === void 0 ? {} : _a, fetchOnUpdateConfigs = _b.fetchOnUpdateConfigs, fetchOnUpdateConfig = _b.fetchOnUpdateConfig, refetchInterval = _b.refetchInterval, fetchOnMount = _b.fetchOnMount, onSuccess = _b.onSuccess, onError = _b.onError;
-    var configsMemo = react_1.useMemo(function () { return configs; }, [configs]);
-    var multiRxObservableConfigMemo = react_1.useMemo(function () {
-        return {
+    var _c = react_1.useState([]), state = _c[0], setState = _c[1];
+    var observable = react_1.useMemo(function () { return new multi_1["default"](); }, []);
+    react_use_1.useDeepCompareEffect(function () {
+        observable.configure({ onSuccess: onSuccess, onError: onError });
+    }, [observable.configure, onSuccess, onError]);
+    react_use_1.useDeepCompareEffect(function () {
+        observable.configure({
+            configs: configs,
             fetchOnUpdateConfigs: fetchOnUpdateConfigs,
             fetchOnUpdateConfig: fetchOnUpdateConfig,
             refetchInterval: refetchInterval,
             fetchOnMount: fetchOnMount
-        };
+        });
+        var subscription = observable.subscribe(setState);
+        return function () { return subscription.unsubscribe(); };
     }, [
+        observable,
+        configs,
         fetchOnUpdateConfigs,
         fetchOnUpdateConfig,
         refetchInterval,
         fetchOnMount,
+        setState,
     ]);
-    var _c = react_1.useState([]), state = _c[0], setState = _c[1];
-    var observable = react_1.useMemo(function () { return new multi_1["default"](); }, []);
-    react_use_1.useDeepCompareEffect(function () {
-        var subscription = observable
-            .configure(configsMemo, multiRxObservableConfigMemo)
-            .subscribe(setState);
-        return function () { return subscription.unsubscribe(); };
-    }, [observable, configsMemo, multiRxObservableConfigMemo, setState]);
-    useCallbacks_1.useMultiCallbacks(state, onSuccess, onError);
     return {
         state: state,
         fetch: observable.fetch

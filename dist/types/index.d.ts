@@ -1,7 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { Subscriber } from "rxjs";
-import MultiObservable from "../Observables/multi";
-import SingleObservable from "../Observables/single";
 import { ErrorRequest, SuccessRequest } from "../utils/Results";
 export interface BaseRxObservableConfig {
     fetchOnMount?: boolean;
@@ -74,10 +72,12 @@ export interface UseRxRequestValue<Data, Error> {
     fetch: UseRxRequestFetchFn;
 }
 export interface MultiRxObservableConfigure<Data, Error> {
-    (configs: RxRequestConfig[], subscriberConfig: MultiRxObservableConfig<Data, Error>): MultiObservable<Data, Error>;
+    (configuration: Partial<{
+        configs: RxRequestConfig[];
+    } & MultiRxObservableConfig<Data, Error>>): void;
 }
 export interface SingleRxObservableConfigure<Data, Error> {
-    (configs: RxRequestConfig, subscriberConfig: SingleRxObservableConfig<Data, Error>): SingleObservable<Data, Error>;
+    (configuration: Partial<RxRequestConfig & SingleRxObservableConfig<Data, Error>>): void;
 }
 export declare type SingleRxObservableState<Data, Error> = RxRequestResult<Data, Error>;
 export interface MultiRxObservableState<Data, Error> {
