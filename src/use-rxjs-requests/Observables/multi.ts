@@ -57,6 +57,10 @@ export default class MultiObservable<Data, Error> extends Observable<
     super((observer) => {
       observer.add(this.state$.subscribe(this.stateListener(observer)));
 
+      observer.add(this.initialState$.subscribe(this.initialStateListener));
+
+      this.initialState$.next(this.getInitialState());
+
       observer.add(
         this.state$
           .pipe(
@@ -89,10 +93,6 @@ export default class MultiObservable<Data, Error> extends Observable<
             }
           })
       );
-
-      observer.add(this.initialState$.subscribe(this.initialStateListener));
-
-      this.initialState$.next(this.getInitialState());
 
       observer.add(
         this.multiRxObservableConfig.subscribe(
