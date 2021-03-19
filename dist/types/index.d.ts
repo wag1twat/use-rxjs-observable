@@ -1,7 +1,5 @@
-import { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { Subscriber } from "rxjs";
-import MultiObservable from "../Observables/multi";
-import SingleObservable from "../Observables/single";
 import { ErrorRequest, SuccessRequest } from "../utils/Results";
 export interface BaseRxObservableConfig {
     fetchOnMount?: boolean;
@@ -42,8 +40,8 @@ export interface RxMutableRequestConfig extends RxRequestConfig {
 }
 export interface RxRequestResult<Data, Error> extends RxMutableRequestConfig, RxRequestConfig {
     isLoading: boolean;
-    data: Data | null;
-    error: Error | null;
+    response: AxiosResponse<Data> | null;
+    error: AxiosError<Error> | null;
     status: "idle" | "success" | "loading" | "error";
     timestamp: Date;
 }
@@ -74,10 +72,12 @@ export interface UseRxRequestValue<Data, Error> {
     fetch: UseRxRequestFetchFn;
 }
 export interface MultiRxObservableConfigure<Data, Error> {
-    (configs: RxRequestConfig[], subscriberConfig: MultiRxObservableConfig<Data, Error>): MultiObservable<Data, Error>;
+    (configuration: Partial<{
+        configs: RxRequestConfig[];
+    } & MultiRxObservableConfig<Data, Error>>): void;
 }
 export interface SingleRxObservableConfigure<Data, Error> {
-    (configs: RxRequestConfig, subscriberConfig: SingleRxObservableConfig<Data, Error>, onSuccess?: OnSuccessUseRxRequest<Data>, onError?: OnErrorUseRxRequest<Error>): SingleObservable<Data, Error>;
+    (configuration: Partial<RxRequestConfig & SingleRxObservableConfig<Data, Error>>): void;
 }
 export declare type SingleRxObservableState<Data, Error> = RxRequestResult<Data, Error>;
 export interface MultiRxObservableState<Data, Error> {

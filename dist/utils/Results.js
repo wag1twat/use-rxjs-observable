@@ -2,10 +2,10 @@
 exports.__esModule = true;
 exports.IdleRequest = exports.LoadingRequest = exports.ErrorRequest = exports.SuccessRequest = void 0;
 var SuccessRequest = /** @class */ (function () {
-    function SuccessRequest(requestId, data, _a) {
+    function SuccessRequest(requestId, response, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
-        this.data = data;
+        this.response = response;
         this.error = null;
         this.status = "success";
         this.requestId = requestId;
@@ -22,7 +22,7 @@ var ErrorRequest = /** @class */ (function () {
     function ErrorRequest(requestId, error, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
-        this.data = null;
+        this.response = null;
         this.error = error;
         this.status = "error";
         this.requestId = requestId;
@@ -36,10 +36,10 @@ var ErrorRequest = /** @class */ (function () {
 }());
 exports.ErrorRequest = ErrorRequest;
 var LoadingRequest = /** @class */ (function () {
-    function LoadingRequest(requestId, data, error, _a) {
+    function LoadingRequest(requestId, response, error, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = true;
-        this.data = data;
+        this.response = response;
         this.error = error;
         this.status = "loading";
         this.requestId = requestId;
@@ -56,7 +56,7 @@ var IdleRequest = /** @class */ (function () {
     function IdleRequest(requestId, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
-        this.data = null;
+        this.response = null;
         this.error = null;
         this.status = "idle";
         this.requestId = requestId;

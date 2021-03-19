@@ -67,7 +67,7 @@ var RequestSubscribe = /** @class */ (function (_super) {
         _this.requestConfigure = function () {
             var self = _this;
             axios_1["default"].interceptors.request.use(function (config) {
-                var loadingRequest = new Results_1.LoadingRequest(self.requestId, self.state.data, self.state.error, {
+                var loadingRequest = new Results_1.LoadingRequest(self.requestId, self.state.response, self.state.error, {
                     url: self.url,
                     method: self.method,
                     body: self.body,
@@ -92,7 +92,7 @@ var RequestSubscribe = /** @class */ (function (_super) {
                         .then(function (response) {
                         var successRequest = new Results_1.SuccessRequest(
                         // @ts-ignore
-                        response.config.requestId, response.data, {
+                        response.config.requestId, response, {
                             url: _this.url,
                             method: _this.method,
                             body: _this.body,
@@ -102,7 +102,7 @@ var RequestSubscribe = /** @class */ (function (_super) {
                         _this.complete();
                     })["catch"](function (error) {
                         if (error.config) {
-                            var errorRequest = new Results_1.ErrorRequest(error.config.requestId, error.message, {
+                            var errorRequest = new Results_1.ErrorRequest(error.config.requestId, error, {
                                 url: _this.url,
                                 method: _this.method,
                                 body: _this.body,
@@ -120,7 +120,10 @@ var RequestSubscribe = /** @class */ (function (_super) {
         _this.method = method;
         _this.body = body;
         _this.params = params;
-        _this.state = { data: (_b = state === null || state === void 0 ? void 0 : state.data) !== null && _b !== void 0 ? _b : null, error: (_c = state === null || state === void 0 ? void 0 : state.error) !== null && _c !== void 0 ? _c : null };
+        _this.state = {
+            response: (_b = state === null || state === void 0 ? void 0 : state.response) !== null && _b !== void 0 ? _b : null,
+            error: (_c = state === null || state === void 0 ? void 0 : state.error) !== null && _c !== void 0 ? _c : null
+        };
         // XHR abort pointer
         _this.aborted = false;
         // binding
