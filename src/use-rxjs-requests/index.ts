@@ -1,5 +1,5 @@
-import useRxRequests from "./useRxJsRequests";
 import useRxRequest from "./useRxJsRequest";
+import useRxRequests from "./useRxJsRequests";
 import {
   BaseRxObservableConfig,
   MultiRxObservableConfig,

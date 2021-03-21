@@ -1,6 +1,6 @@
+import useRxRequest from "./dist/useRxJsRequest";
+import useRxRequests from "./dist/useRxJsRequests";
 import {
-  useRxRequest,
-  useRxRequests,
   BaseRxObservableConfig,
   MultiRxObservableConfig,
   SingleRxObservableConfigListener,
