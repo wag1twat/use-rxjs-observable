@@ -4,7 +4,7 @@ import {
   RxRequestConfig,
   useRxRequest,
   useRxRequests,
-} from "./use-rxjs-requests";
+} from "use-rxjs-requests";
 import { v4 } from "uuid";
 
 function App() {
