@@ -4,32 +4,18 @@
 
 ```javascript
 import React from "react";
-import {
-  RxRequestConfig,
-  useRxJsRequest,
-} from "use-rxjs-requests";
-import { v4 } from "uuid";
+import { RxRequestConfig, useRxJsRequest } from "use-rxjs-requests";
 
 function App() {
-  const [config, setConfig] = React.useState<RxRequestConfig>({
-    method: "get",
-    url: "https://jsonplaceholder.typicode.com/todos/1",
-    body: { uuid: v4(), body: { uuid: v4() } },
-    params: { uuid: v4(), params: { uuid: v4() } },
-  });
-
-  const [options, setOptions] = React.useState({
-    refetchInterval: undefined,
-    fetchOnMount: false,
-    onSuccess: (success) => { // success: SuccessRequest
-      console.log("success", success);
-      },
-    onError: (error) => { // error: ErrorRequest
-      console.log("error", error);
+  const { state, fetch } = useRxJsRequest<AxiosResponse, AxiosError>(
+    {
+      method: "get",
+      url: "https://jsonplaceholder.typicode.com/todos/1",
+      body: { uuid: { id: 1 }, body: { uuid: { id: 1 } } },
+      params: { uuid: { id: 1 }, params: { uuid: { id: 1 } } },
     },
-  });
-
-  const { state, fetch } = useRxJsRequest(config, options);
+    options
+  );
 
   React.useEffect(() => {
     fetch();
@@ -47,32 +33,26 @@ function App() {
 
 ```javascript
 import React from "react";
-import {
-  RxRequestConfig,
-  useRxJsRequests,
-} from "use-rxjs-requests";
-import { v4 } from "uuid";
+import { RxRequestConfig, useRxJsRequests } from "use-rxjs-requests";
 
 function App() {
-  const [configs, setConfigs] = React.useState<RxRequestConfig[]>([{
-    method: "get",
-    url: "https://jsonplaceholder.typicode.com/todos/1",
-    body: { uuid: v4(), body: { uuid: v4() } },
-    params: { uuid: v4(), params: { uuid: v4() } },
-  }]);
-
-  const [options, setOptions] = React.useState({
-    refetchInterval: undefined,
-    fetchOnMount: false,
-    onSuccess: (success) => { // success: SuccessRequest[]
-      console.log("success", success);
+  const { state, fetch } = useRxJsRequests<AxiosResponse, AxiosError>(
+    [
+      {
+        method: "get",
+        url: "https://jsonplaceholder.typicode.com/todos/1",
+        body: { uuid: { id: 1 }, body: { uuid: { id: 1 } } },
+        params: { uuid: { id: 1 }, params: { uuid: { id: 1 } } },
       },
-    onError: (error) => { // error: ErrorRequest[]
-      console.log("error", error);
-    },
-  });
-
-  const { state, fetch } = useRxJsRequests(configs, options);
+      {
+        method: "get",
+        url: "https://jsonplaceholder.typicode.com/todos/1",
+        body: { uuid: { id: 1 }, body: { uuid: { id: 1 } } },
+        params: { uuid: { id: 1 }, params: { uuid: { id: 1 } } },
+      },
+    ],
+    options
+  );
 
   React.useEffect(() => {
     fetch();
@@ -84,3 +64,4 @@ function App() {
 
   return <div>...</div>;
 }
+```
