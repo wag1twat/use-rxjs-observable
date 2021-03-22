@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import SingleObservable from "../Observables/single";
 import {
   RxRequestConfig,
@@ -13,8 +12,6 @@ export default function useRxJsRequest<Data = any, Error = any>(
   { method, url, body, params }: RxRequestConfig,
   {
     refetchInterval,
-    fetchOnUpdateConfig,
-    fetchOnUpdateConfigs,
     fetchOnMount,
     onError,
     onSuccess,
@@ -24,44 +21,40 @@ export default function useRxJsRequest<Data = any, Error = any>(
 
   const [state, setState] = useState<Partial<RxRequestResult<Data, Error>>>({});
 
-  useDeepCompareEffect(() => {
-    observable.configure({ onError, onSuccess });
-  }, [onError, onSuccess, observable.configure]);
-
-  useDeepCompareEffect(() => {
+  useEffect(() => {
     observable.configure({
       method,
       url,
       body,
       params,
       refetchInterval,
-      fetchOnUpdateConfig,
-      fetchOnUpdateConfigs,
       fetchOnMount,
+      onSuccess,
+      onError,
     });
-
-    const subscription = observable.subscribe(setState);
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     observable.configure,
-    observable.subscribe,
     method,
     url,
     body,
     params,
     refetchInterval,
-    fetchOnUpdateConfig,
-    fetchOnUpdateConfigs,
     fetchOnMount,
+    onSuccess,
+    onError,
   ]);
+
+  useDeepCompareEffect(() => {
+    const subscription = observable.subscribe(setState);
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [observable.subscribe]);
 
   return {
     state,
-    fetch: useCallback((config) => observable.fetch(config), [
-      observable.fetch,
-    ]),
+    fetch: useCallback((config) => observable.fetch(config), [observable]),
   };
 }

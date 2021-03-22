@@ -1,11 +1,9 @@
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
-import { Subscriber } from "rxjs";
+import { Subscriber, Subscription } from "rxjs";
 import { ErrorRequest, SuccessRequest } from "../utils/Results";
 
 export interface BaseRxObservableConfig {
   fetchOnMount?: boolean;
-  fetchOnUpdateConfigs?: boolean;
-  fetchOnUpdateConfig?: boolean;
   refetchInterval?: number;
 }
 export interface MultiRxObservableConfig<Data, Error>
@@ -14,28 +12,26 @@ export interface MultiRxObservableConfig<Data, Error>
   onError?: OnErrorUseRxRequests<Error>;
 }
 
-export interface SingleRxObservableConfigListener<Data, Error> {
-  (observer: Subscriber<RxRequestResult<Data, Error>>): (
-    singleRxObservableConfig: SingleRxObservableConfig<Data, Error>
-  ) => void;
-}
-
-export interface MultiRxObservableConfigListener<Data, Error> {
-  (observer: Subscriber<RxRequestResult<Data, Error>[]>): (
-    multiRxObservableConfig: MultiRxObservableConfig<Data, Error>
-  ) => void;
-}
-
 export interface SingleRxObservableStateListener<Data, Error> {
-  (observer: Subscriber<RxRequestResult<Data, Error>>): (
-    state: RxRequestResult<Data, Error>
+  (observer: Subscriber<RxRequestResult<Data, Error>>): Subscription;
+}
+
+export interface SingleObservableConfigurationListener<Data, Error> {
+  (observer: Subscriber<RxRequestResult<Data, Error>>): Subscription;
+}
+
+export interface MultiObservableConfigurationListener<Data, Error> {
+  (observer: Subscriber<RxRequestResult<Data, Error>[]>): (
+    configuration: Partial<
+      {
+        configs: (RxRequestConfig & { requestId: string })[];
+      } & MultiRxObservableConfig<Data, Error>
+    >
   ) => void;
 }
 
 export interface MultiRxObservableStateListener<Data, Error> {
-  (observer: Subscriber<RxRequestResult<Data, Error>[]>): (state: {
-    [key: string]: RxRequestResult<Data, Error>;
-  }) => void;
+  (observer: Subscriber<RxRequestResult<Data, Error>[]>): void;
 }
 
 export interface SingleRxObservableConfig<Data, Error>
@@ -51,12 +47,12 @@ export interface RxRequestConfig {
   params?: AxiosRequestConfig["params"];
 }
 
-export interface RxMutableRequestConfig extends RxRequestConfig {
+export interface RxRequestConfigRequestId extends RxRequestConfig {
   requestId: string;
 }
 
 export interface RxRequestResult<Data, Error>
-  extends RxMutableRequestConfig,
+  extends RxRequestConfigRequestId,
     RxRequestConfig {
   isLoading: boolean;
   response: AxiosResponse<Data> | null;
@@ -81,15 +77,19 @@ export interface OnErrorUseRxRequest<Error> {
   (error: ErrorRequest<Error>): void;
 }
 
+export interface UseRxRequestsFetchFn {
+  (): void;
+}
+
 export interface UseRxRequestsValue<Data, Error> {
   state: RxRequestResult<Data, Error>[];
-  fetch: () => void;
+  fetch: UseRxRequestsFetchFn;
 }
 
 export interface UseRxRequestFetchFn {
   (config?: {
-    body: RxRequestConfig["body"];
-    params: RxRequestConfig["params"];
+    body?: RxRequestConfig["body"];
+    params?: RxRequestConfig["params"];
   }): Promise<void>;
 }
 

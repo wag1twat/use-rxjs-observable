@@ -1,17 +1,15 @@
 import { BehaviorSubject, interval, Observable } from "rxjs";
-import { memoize } from "lodash";
+import { equalObjects } from "../utils/equalObjects";
 import RequestSubscriber from "../RequestSubscriber";
 import {
   RxRequestResult,
   SingleRxObservableConfigure,
   SingleRxObservableConfig,
-  RxMutableRequestConfig,
   UseRxRequestFetchFn,
-  SingleRxObservableConfigListener,
   SingleRxObservableStateListener,
   SingleRxObservableState,
-  OnSuccessUseRxRequest,
-  OnErrorUseRxRequest,
+  RxRequestConfig,
+  SingleObservableConfigurationListener,
 } from "../types";
 import { v4 } from "uuid";
 import {
@@ -27,54 +25,33 @@ import { ErrorRequest, IdleRequest, SuccessRequest } from "../utils/Results";
 export default class SingleObservable<Data, Error> extends Observable<
   RxRequestResult<Data, Error>
 > {
-  private config: BehaviorSubject<RxMutableRequestConfig> = new BehaviorSubject(
-    {} as RxMutableRequestConfig
-  );
-
-  private singleRxObservableConfig: BehaviorSubject<
-    SingleRxObservableConfig<Data, Error>
+  private configuration$: BehaviorSubject<
+    Partial<RxRequestConfig & SingleRxObservableConfig<Data, Error>>
   > = new BehaviorSubject({});
+
+  private requestId$: BehaviorSubject<string> = new BehaviorSubject(v4());
 
   private initialState$: BehaviorSubject<
     SingleRxObservableState<Data, Error>
   > = new BehaviorSubject({} as SingleRxObservableState<Data, Error>);
+
   private state$: BehaviorSubject<
     SingleRxObservableState<Data, Error>
   > = new BehaviorSubject({} as SingleRxObservableState<Data, Error>);
 
-  private onSuccess?: OnSuccessUseRxRequest<Data>;
-
-  private onError?: OnErrorUseRxRequest<Error>;
-
   constructor() {
     super((observer) => {
-      observer.add(
-        this.state$
-          .pipe(distinctUntilKeyChanged("status"))
-          .subscribe(this.stateListener(observer))
-      );
+      observer.add(this.configurationListener(observer));
 
-      observer.add(
-        this.initialState$
-          .pipe(distinctUntilKeyChanged("status"))
-          .subscribe(this.initialStateListener)
-      );
+      observer.add(this.stateListener(observer));
+
+      observer.add(this.initialStateListener());
 
       this.initialState$.next(this.getInitialState());
-
-      observer.add(
-        this.singleRxObservableConfig
-          .pipe(distinctUntilChanged())
-          .subscribe(this.singleRxObservableConfigListener(observer))
-      );
     });
 
-    // bindings
-
     this.configure = this.configure.bind(this);
-    this.singleRxObservableConfigListener = this.singleRxObservableConfigListener.bind(
-      this
-    );
+    this.configurationListener = this.configurationListener.bind(this);
     this.getInitialState = this.getInitialState.bind(this);
     this.initialStateListener = this.initialStateListener.bind(this);
     this.stateListener = this.stateListener.bind(this);
@@ -82,95 +59,99 @@ export default class SingleObservable<Data, Error> extends Observable<
   }
 
   private getInitialState = () => {
-    const config = this.config.getValue();
-    return new IdleRequest(config.requestId, config);
-  };
-
-  private initialStateListener = (
-    initialState: SingleRxObservableState<Data, Error>
-  ) => this.state$.next(initialState);
-
-  private stateListener: SingleRxObservableStateListener<Data, Error> = (
-    observer
-  ) => (state) => {
-    if (this.onSuccess) {
-      if (state.status === "success") {
-        this.onSuccess(state as SuccessRequest<Data>);
-      }
-    }
-
-    if (this.onError) {
-      if (state.status === "error") {
-        this.onError(state as ErrorRequest<Error>);
-      }
-    }
-
-    observer.next(state);
-  };
-
-  private singleRxObservableConfigListener: SingleRxObservableConfigListener<
-    Data,
-    Error
-  > = (observer) => (singleRxObservableConfig) => {
-    const { fetchOnMount, refetchInterval } = singleRxObservableConfig;
-
-    if (fetchOnMount && !refetchInterval) {
-      this.fetch();
-    }
-
-    if (!fetchOnMount && refetchInterval) {
-      observer.add(
-        interval(refetchInterval)
-          .pipe(
-            startWith(0),
-            takeWhile(() => this.state$.getValue().status !== "loading")
-          )
-          .subscribe(() => this.fetch())
-      );
-    }
-  };
-
-  public configure: SingleRxObservableConfigure<Data, Error> = ({
-    method,
-    url,
-    body,
-    params,
-    refetchInterval,
-    fetchOnMount,
-    fetchOnUpdateConfig,
-    onSuccess,
-    onError,
-  }) => {
-    if (method && url) {
-      this.config.next({ method, url, body, params, requestId: v4() });
-    }
-
-    if (onSuccess) {
-      this.onSuccess = memoize(onSuccess);
-    }
-
-    if (onError) {
-      this.onError = memoize(onError);
-    }
-
-    this.singleRxObservableConfig.next({
-      refetchInterval,
-      fetchOnMount,
-      fetchOnUpdateConfig,
+    const { method, url, body, params } = this.configuration$.getValue();
+    return new IdleRequest(this.requestId$.getValue(), {
+      method,
+      url,
+      body,
+      params,
     });
   };
 
-  public fetch: UseRxRequestFetchFn = (_config?) => {
-    if (_config) {
-      return this.config
+  private initialStateListener = () => {
+    return this.initialState$
+      .pipe(distinctUntilKeyChanged("status"))
+      .subscribe((initialState) => this.state$.next(initialState));
+  };
+
+  private stateListener: SingleRxObservableStateListener<Data, Error> = (
+    observer
+  ) => {
+    const onSuccess = this.configuration$.getValue().onSuccess;
+
+    const onError = this.configuration$.getValue().onError;
+
+    return this.state$
+      .pipe(distinctUntilKeyChanged("status"))
+      .subscribe((state) => {
+        if (onSuccess) {
+          if (state.status === "success") {
+            onSuccess(state as SuccessRequest<Data>);
+          }
+        }
+
+        if (onError) {
+          if (state.status === "error") {
+            onError(state as ErrorRequest<Error>);
+          }
+        }
+
+        observer.next(state);
+      });
+  };
+
+  private configurationListener: SingleObservableConfigurationListener<
+    Data,
+    Error
+  > = (observer) => {
+    return this.configuration$
+      .pipe(distinctUntilChanged())
+      .subscribe(({ fetchOnMount, refetchInterval }) => {
+        if (fetchOnMount && !refetchInterval) {
+          this.fetch();
+        }
+
+        if (!fetchOnMount && refetchInterval) {
+          observer.add(
+            interval(refetchInterval)
+              .pipe(
+                startWith(0),
+                takeWhile(() => this.state$.getValue().status !== "loading")
+              )
+              .subscribe(() => this.fetch())
+          );
+        }
+      });
+  };
+
+  public configure: SingleRxObservableConfigure<Data, Error> = (
+    configuration
+  ) => {
+    const equal = equalObjects(this.configuration$.getValue(), configuration);
+    if (!equal) {
+      this.configuration$.next(configuration);
+    }
+  };
+
+  public fetch: UseRxRequestFetchFn = (config) => {
+    if (config) {
+      return this.configuration$
         .pipe(
-          map((config) => {
+          map(({ method, url, body, params }) => {
             const state = this.state$.getValue();
+
             return new Observable<RxRequestResult<Data, Error>>(
               (observer) =>
                 new RequestSubscriber<Data, Error>(
                   observer,
-                  { ...config, ..._config },
+                  {
+                    method,
+                    url,
+                    body,
+                    params,
+                    requestId: this.requestId$.getValue(),
+                    ...config,
+                  },
                   state
                 )
             );
@@ -183,13 +164,23 @@ export default class SingleObservable<Data, Error> extends Observable<
         });
     }
 
-    return this.config
+    return this.configuration$
       .pipe(
-        map((config) => {
+        map(({ method, url, body, params }) => {
           const state = this.state$.getValue();
           return new Observable<RxRequestResult<Data, Error>>(
             (observer) =>
-              new RequestSubscriber<Data, Error>(observer, config, state)
+              new RequestSubscriber<Data, Error>(
+                observer,
+                {
+                  method,
+                  url,
+                  body,
+                  params,
+                  requestId: this.requestId$.getValue(),
+                },
+                state
+              )
           );
         }),
         mergeMap((v) => v),

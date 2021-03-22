@@ -1,7 +1,7 @@
 import { Observer, Subscriber } from "rxjs";
 import axios, { AxiosRequestConfig } from "axios";
 import { ErrorRequest, LoadingRequest, SuccessRequest } from "../utils/Results";
-import { RxMutableRequestConfig, RxRequestResult } from "../types";
+import { RxRequestResult, RxRequestConfigRequestId } from "../types";
 import axiosCancel from "axios-cancel";
 
 // @ts-ignore
@@ -10,11 +10,11 @@ axiosCancel(axios);
 class RequestSubscribe<Data = any, Error = any> extends Subscriber<
   RxRequestResult<Data, Error>
 > {
-  private requestId: RxMutableRequestConfig["requestId"];
-  private url: RxMutableRequestConfig["url"];
-  private method: RxMutableRequestConfig["method"];
-  private body: RxMutableRequestConfig["body"];
-  private params: RxMutableRequestConfig["params"];
+  private requestId: RxRequestConfigRequestId["requestId"];
+  private url: RxRequestConfigRequestId["url"];
+  private method: RxRequestConfigRequestId["method"];
+  private body: RxRequestConfigRequestId["body"];
+  private params: RxRequestConfigRequestId["params"];
 
   private state: {
     response: RxRequestResult<Data, Error>["response"];
@@ -25,7 +25,7 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
 
   constructor(
     observer: Observer<RxRequestResult<Data, Error>>,
-    { requestId, url, method, body, params }: RxMutableRequestConfig,
+    { requestId, url, method, body, params }: RxRequestConfigRequestId,
     state: RxRequestResult<Data, Error>
   ) {
     super(observer);

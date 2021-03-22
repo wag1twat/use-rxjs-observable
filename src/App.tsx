@@ -1,10 +1,10 @@
 import "./App.css";
-import React, { useCallback } from "react";
+import React from "react";
 import {
   RxRequestConfig,
   useRxRequest,
   useRxRequests,
-} from "use-rxjs-requests";
+} from "./use-rxjs-requests";
 import { v4 } from "uuid";
 
 function App() {
@@ -38,11 +38,11 @@ function App() {
     {
       method: "put",
       url: "https://jsonplaceholder.typicode.com/todos/1",
+      ...config,
     },
     {
       refetchInterval: undefined,
       fetchOnMount: false,
-      fetchOnUpdateConfig: false,
       onSuccess: (success) => {
         console.log("success", success);
       },
@@ -59,7 +59,6 @@ function App() {
   );
 
   const { state: result, fetch: request } = useRxRequests(configs, {
-    fetchOnUpdateConfigs: false,
     onSuccess: (success) => {
       console.log("success", success);
     },
@@ -97,15 +96,7 @@ function App() {
       >
         set config
       </button>
-      <button
-        style={{ margin: 10 }}
-        onClick={() =>
-          fetch({
-            body: { uuid: v4(), body: { uuid: v4() } },
-            params: { uuid: v4(), params: { uuid: v4() } },
-          })
-        }
-      >
+      <button style={{ margin: 10 }} onClick={() => fetch()}>
         fetch request
       </button>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "10px" }}>
