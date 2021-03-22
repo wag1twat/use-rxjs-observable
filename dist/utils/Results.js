@@ -3,6 +3,7 @@ exports.__esModule = true;
 exports.IdleRxRequest = exports.LoadingRxRequest = exports.ErrorRxRequest = exports.SuccessRxRequest = void 0;
 var SuccessRxRequest = /** @class */ (function () {
     function SuccessRxRequest(response, _a) {
+        if (response === void 0) { response = null; }
         var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = response;
@@ -20,6 +21,7 @@ var SuccessRxRequest = /** @class */ (function () {
 exports.SuccessRxRequest = SuccessRxRequest;
 var ErrorRxRequest = /** @class */ (function () {
     function ErrorRxRequest(error, _a) {
+        if (error === void 0) { error = null; }
         var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = null;
@@ -37,6 +39,8 @@ var ErrorRxRequest = /** @class */ (function () {
 exports.ErrorRxRequest = ErrorRxRequest;
 var LoadingRxRequest = /** @class */ (function () {
     function LoadingRxRequest(response, error, _a) {
+        if (response === void 0) { response = null; }
+        if (error === void 0) { error = null; }
         var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = true;
         this.response = response;
@@ -54,6 +58,8 @@ var LoadingRxRequest = /** @class */ (function () {
 exports.LoadingRxRequest = LoadingRxRequest;
 var IdleRxRequest = /** @class */ (function () {
     function IdleRxRequest(response, error, _a) {
+        if (response === void 0) { response = null; }
+        if (error === void 0) { error = null; }
         var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = response;
