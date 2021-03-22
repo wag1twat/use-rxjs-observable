@@ -28,7 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 exports.__esModule = true;
 var rxjs_1 = require("rxjs");
-var lodash_1 = require("lodash");
+var equalObjects_1 = require("../utils/equalObjects");
 var RequestSubscriber_1 = __importDefault(require("../RequestSubscriber"));
 var uuid_1 = require("uuid");
 var operators_1 = require("rxjs/operators");
@@ -37,94 +37,106 @@ var SingleObservable = /** @class */ (function (_super) {
     __extends(SingleObservable, _super);
     function SingleObservable() {
         var _this = _super.call(this, function (observer) {
-            observer.add(_this.state$
-                .pipe(operators_1.distinctUntilKeyChanged("status"))
-                .subscribe(_this.stateListener(observer)));
-            observer.add(_this.initialState$
-                .pipe(operators_1.distinctUntilKeyChanged("status"))
-                .subscribe(_this.initialStateListener));
+            observer.add(_this.configurationListener(observer));
+            observer.add(_this.stateListener(observer));
+            observer.add(_this.initialStateListener());
             _this.initialState$.next(_this.getInitialState());
-            observer.add(_this.singleRxObservableConfig
-                .pipe(operators_1.distinctUntilChanged())
-                .subscribe(_this.singleRxObservableConfigListener(observer)));
         }) || this;
-        _this.config = new rxjs_1.BehaviorSubject({});
-        _this.singleRxObservableConfig = new rxjs_1.BehaviorSubject({});
+        _this.configuration$ = new rxjs_1.BehaviorSubject({});
+        _this.requestId$ = new rxjs_1.BehaviorSubject(uuid_1.v4());
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
-            var config = _this.config.getValue();
-            return new Results_1.IdleRequest(config.requestId, config);
-        };
-        _this.initialStateListener = function (initialState) { return _this.state$.next(initialState); };
-        _this.stateListener = function (observer) { return function (state) {
-            if (_this.onSuccess) {
-                if (state.status === "success") {
-                    _this.onSuccess(state);
-                }
-            }
-            if (_this.onError) {
-                if (state.status === "error") {
-                    _this.onError(state);
-                }
-            }
-            observer.next(state);
-        }; };
-        _this.singleRxObservableConfigListener = function (observer) { return function (singleRxObservableConfig) {
-            var fetchOnMount = singleRxObservableConfig.fetchOnMount, refetchInterval = singleRxObservableConfig.refetchInterval;
-            if (fetchOnMount && !refetchInterval) {
-                _this.fetch();
-            }
-            if (!fetchOnMount && refetchInterval) {
-                observer.add(rxjs_1.interval(refetchInterval)
-                    .pipe(operators_1.startWith(0), operators_1.takeWhile(function () { return _this.state$.getValue().status !== "loading"; }))
-                    .subscribe(function () { return _this.fetch(); }));
-            }
-        }; };
-        _this.configure = function (_a) {
-            var method = _a.method, url = _a.url, body = _a.body, params = _a.params, refetchInterval = _a.refetchInterval, fetchOnMount = _a.fetchOnMount, fetchOnUpdateConfig = _a.fetchOnUpdateConfig, onSuccess = _a.onSuccess, onError = _a.onError;
-            if (method && url) {
-                _this.config.next({ method: method, url: url, body: body, params: params, requestId: uuid_1.v4() });
-            }
-            if (onSuccess) {
-                _this.onSuccess = lodash_1.memoize(onSuccess);
-            }
-            if (onError) {
-                _this.onError = lodash_1.memoize(onError);
-            }
-            _this.singleRxObservableConfig.next({
-                refetchInterval: refetchInterval,
-                fetchOnMount: fetchOnMount,
-                fetchOnUpdateConfig: fetchOnUpdateConfig
+            var _a = _this.configuration$.getValue(), method = _a.method, url = _a.url, body = _a.body, params = _a.params;
+            return new Results_1.IdleRequest(_this.requestId$.getValue(), {
+                method: method,
+                url: url,
+                body: body,
+                params: params
             });
         };
-        _this.fetch = function (_config) {
-            if (_config) {
-                return _this.config
-                    .pipe(operators_1.map(function (config) {
+        _this.initialStateListener = function () {
+            return _this.initialState$
+                .pipe(operators_1.distinctUntilKeyChanged("status"))
+                .subscribe(function (initialState) { return _this.state$.next(initialState); });
+        };
+        _this.stateListener = function (observer) {
+            var onSuccess = _this.configuration$.getValue().onSuccess;
+            var onError = _this.configuration$.getValue().onError;
+            return _this.state$
+                .pipe(operators_1.distinctUntilKeyChanged("status"))
+                .subscribe(function (state) {
+                if (onSuccess) {
+                    if (state.status === "success") {
+                        onSuccess(state);
+                    }
+                }
+                if (onError) {
+                    if (state.status === "error") {
+                        onError(state);
+                    }
+                }
+                observer.next(state);
+            });
+        };
+        _this.configurationListener = function (observer) {
+            return _this.configuration$
+                .pipe(operators_1.distinctUntilChanged())
+                .subscribe(function (_a) {
+                var fetchOnMount = _a.fetchOnMount, refetchInterval = _a.refetchInterval;
+                if (fetchOnMount && !refetchInterval) {
+                    _this.fetch();
+                }
+                if (!fetchOnMount && refetchInterval) {
+                    observer.add(rxjs_1.interval(refetchInterval)
+                        .pipe(operators_1.startWith(0), operators_1.takeWhile(function () { return _this.state$.getValue().status !== "loading"; }))
+                        .subscribe(function () { return _this.fetch(); }));
+                }
+            });
+        };
+        _this.configure = function (configuration) {
+            var equal = equalObjects_1.equalObjects(_this.configuration$.getValue(), configuration);
+            if (!equal) {
+                _this.configuration$.next(configuration);
+            }
+        };
+        _this.fetch = function (config) {
+            if (config) {
+                return _this.configuration$
+                    .pipe(operators_1.map(function (_a) {
+                    var method = _a.method, url = _a.url, body = _a.body, params = _a.params;
                     var state = _this.state$.getValue();
                     return new rxjs_1.Observable(function (observer) {
-                        return new RequestSubscriber_1["default"](observer, __assign(__assign({}, config), _config), state);
+                        return new RequestSubscriber_1["default"](observer, __assign({ method: method,
+                            url: url,
+                            body: body,
+                            params: params, requestId: _this.requestId$.getValue() }, config), state);
                     });
                 }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilKeyChanged("status"))
                     .forEach(function (result) {
                     _this.state$.next(result);
                 });
             }
-            return _this.config
-                .pipe(operators_1.map(function (config) {
+            return _this.configuration$
+                .pipe(operators_1.map(function (_a) {
+                var method = _a.method, url = _a.url, body = _a.body, params = _a.params;
                 var state = _this.state$.getValue();
                 return new rxjs_1.Observable(function (observer) {
-                    return new RequestSubscriber_1["default"](observer, config, state);
+                    return new RequestSubscriber_1["default"](observer, {
+                        method: method,
+                        url: url,
+                        body: body,
+                        params: params,
+                        requestId: _this.requestId$.getValue()
+                    }, state);
                 });
             }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilKeyChanged("status"))
                 .forEach(function (result) {
                 _this.state$.next(result);
             });
         };
-        // bindings
         _this.configure = _this.configure.bind(_this);
-        _this.singleRxObservableConfigListener = _this.singleRxObservableConfigListener.bind(_this);
+        _this.configurationListener = _this.configurationListener.bind(_this);
         _this.getInitialState = _this.getInitialState.bind(_this);
         _this.initialStateListener = _this.initialStateListener.bind(_this);
         _this.stateListener = _this.stateListener.bind(_this);
