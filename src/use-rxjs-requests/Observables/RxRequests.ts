@@ -11,13 +11,7 @@ import {
   RxUseRequestsOptions,
   RxUseRequestsState,
 } from "../types";
-import {
-  map as LodashMap,
-  reduce as LodashReduce,
-  values as LodashValues,
-  omit,
-} from "lodash";
-import { v4 } from "uuid";
+import { reduce as LodashReduce, values as LodashValues } from "lodash";
 import {
   filter,
   map,

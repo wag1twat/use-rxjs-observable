@@ -1,14 +1,14 @@
 import "./App.css";
 import React from "react";
-import useRxJsRequest from "./use-rxjs-requests/useRxJsRequest";
-import useRxJsRequests from "./use-rxjs-requests/useRxJsRequests";
-import { RxRequestConfig, RxRequestResult } from "./use-rxjs-requests";
+// import useRxJsRequest from "./use-rxjs-requests/useRxJsRequest";
+// import useRxJsRequests from "./use-rxjs-requests/useRxJsRequests";
+// import { RxRequestConfig } from "./use-rxjs-requests";
 import { v4 } from "uuid";
-// import {
-//   RxRequestConfig,
-//   useRxJsRequest,
-//   useRxJsRequests,
-// } from "use-rxjs-requests";
+import {
+  RxRequestConfig,
+  useRxJsRequest,
+  useRxJsRequests,
+} from "use-rxjs-requests";
 
 function App() {
   const [config, setConfig] = React.useState<RxRequestConfig>({
