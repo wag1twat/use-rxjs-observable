@@ -44,7 +44,10 @@ function useRxJsRequest(_a, _b) {
     }, [observable.subscribe]);
     return {
         state: state,
-        fetch: react_1.useCallback(function (config) { return observable.fetch(config); }, [observable])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        fetch: react_1.useCallback(function (config) { return observable.fetch(config); }, [
+            observable.fetch,
+        ])
     };
 }
 exports["default"] = useRxJsRequest;
