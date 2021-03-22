@@ -9,6 +9,7 @@ import { RxRequestConfig, useRxJsRequest } from "use-rxjs-requests";
 function App() {
   const { state, fetch } = useRxJsRequest<AxiosResponse, AxiosError>(
     {
+      requestId: "request-01",
       method: "get",
       url: "https://jsonplaceholder.typicode.com/todos/1",
       body: { uuid: { id: 1 }, body: { uuid: { id: 1 } } },
@@ -39,12 +40,14 @@ function App() {
   const { state, fetch } = useRxJsRequests<AxiosResponse, AxiosError>(
     [
       {
+        requestId: "request-01",
         method: "get",
         url: "https://jsonplaceholder.typicode.com/todos/1",
         body: { uuid: { id: 1 }, body: { uuid: { id: 1 } } },
         params: { uuid: { id: 1 }, params: { uuid: { id: 1 } } },
       },
       {
+        requestId: "request-02",
         method: "get",
         url: "https://jsonplaceholder.typicode.com/todos/1",
         body: { uuid: { id: 1 }, body: { uuid: { id: 1 } } },

@@ -1,7 +1,7 @@
 import { Observer, Subscriber } from "rxjs";
 import axios, { AxiosRequestConfig } from "axios";
 import axiosCancel from "axios-cancel";
-import { RxRequestConfigRequestId, RxRequestResult } from "../types";
+import { RxRequestConfig, RxRequestResult } from "../types";
 import {
   LoadingRxRequest,
   SuccessRxRequest,
@@ -14,11 +14,11 @@ axiosCancel(axios);
 class RequestSubscribe<Data = any, Error = any> extends Subscriber<
   RxRequestResult<Data, Error>
 > {
-  private requestId: RxRequestConfigRequestId["requestId"];
-  private url: RxRequestConfigRequestId["url"];
-  private method: RxRequestConfigRequestId["method"];
-  private body: RxRequestConfigRequestId["body"];
-  private params: RxRequestConfigRequestId["params"];
+  private requestId: RxRequestConfig["requestId"];
+  private url: RxRequestConfig["url"];
+  private method: RxRequestConfig["method"];
+  private body: RxRequestConfig["body"];
+  private params: RxRequestConfig["params"];
 
   private state: {
     response: RxRequestResult<Data, Error>["response"];
@@ -29,7 +29,7 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
 
   constructor(
     observer: Observer<RxRequestResult<Data, Error>>,
-    { requestId, url, method, body, params }: RxRequestConfigRequestId,
+    { requestId, url, method, body, params }: RxRequestConfig,
     state: RxRequestResult<Data, Error>
   ) {
     super(observer);
@@ -65,10 +65,10 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
 
     axios.interceptors.request.use(function (config: AxiosRequestConfig) {
       const loadingRxRequest = new LoadingRxRequest<Data, Error>(
-        self.requestId,
         self.state.response,
         self.state.error,
         {
+          requestId: self.requestId,
           url: self.url,
           method: self.method,
           body: self.body,
@@ -93,17 +93,13 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
         params: this.params,
       })
       .then((response) => {
-        const successRxRequest = new SuccessRxRequest<Data>(
-          // @ts-ignore
-          response.config.requestId,
-          response,
-          {
-            url: this.url,
-            method: this.method,
-            body: this.body,
-            params: this.params,
-          }
-        );
+        const successRxRequest = new SuccessRxRequest<Data>(response, {
+          requestId: this.requestId,
+          url: this.url,
+          method: this.method,
+          body: this.body,
+          params: this.params,
+        });
 
         this.next(successRxRequest);
 
@@ -111,16 +107,13 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
       })
       .catch((error) => {
         if (error.config) {
-          const errorRxRequest = new ErrorRxRequest<Error>(
-            error.config.requestId,
-            error,
-            {
-              url: this.url,
-              method: this.method,
-              body: this.body,
-              params: this.params,
-            }
-          );
+          const errorRxRequest = new ErrorRxRequest<Error>(error, {
+            requestId: this.requestId,
+            url: this.url,
+            method: this.method,
+            body: this.body,
+            params: this.params,
+          });
 
           this.next(errorRxRequest);
 

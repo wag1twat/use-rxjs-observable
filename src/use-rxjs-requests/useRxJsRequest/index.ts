@@ -9,7 +9,7 @@ import {
 } from "../types";
 
 export default function useRxJsRequest<Data = any, Error = any>(
-  { method, url, body, params }: RxRequestConfig,
+  { requestId, method, url, body, params }: RxRequestConfig,
   {
     refetchInterval,
     fetchOnMount,
@@ -23,6 +23,7 @@ export default function useRxJsRequest<Data = any, Error = any>(
 
   useEffect(() => {
     observable.configure({
+      requestId,
       method,
       url,
       body,
@@ -35,6 +36,7 @@ export default function useRxJsRequest<Data = any, Error = any>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     observable.configure,
+    requestId,
     method,
     url,
     body,

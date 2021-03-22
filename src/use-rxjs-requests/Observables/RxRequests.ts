@@ -28,7 +28,6 @@ import {
   takeWhile,
   distinctUntilChanged,
   concatMap,
-  tap,
 } from "rxjs/operators";
 import { equalArray } from "../utils/equalArray";
 import {
@@ -79,13 +78,29 @@ export default class RxRequests<Data, Error> extends Observable<
   }
 
   private getInitialState = () => {
+    const state = this.state$.getValue();
+
     return LodashReduce(
       this.options$.getValue().configs,
+
       (acc, mutableRequestConfig) => {
+        const exist = state[mutableRequestConfig.requestId];
+
+        if (exist) {
+          return {
+            ...acc,
+            [mutableRequestConfig.requestId]: new IdleRxRequest(
+              exist.response,
+              exist.error,
+              mutableRequestConfig
+            ),
+          };
+        }
         return {
           ...acc,
           [mutableRequestConfig.requestId]: new IdleRxRequest(
-            mutableRequestConfig.requestId,
+            null,
+            null,
             mutableRequestConfig
           ),
         };
@@ -171,24 +186,10 @@ export default class RxRequests<Data, Error> extends Observable<
   };
 
   public configure: RxRequestsConfigure<Data, Error> = (options) => {
-    const equal = equalObjects(
-      {
-        ...this.options$.getValue(),
-        configs: LodashMap(this.options$.getValue().configs, (config) =>
-          omit(config, "requestId")
-        ),
-      },
-      options
-    );
+    const equal = equalObjects(this.options$.getValue(), options);
 
     if (!equal) {
-      this.options$.next({
-        ...options,
-        configs: LodashMap(options.configs, (config) => ({
-          ...config,
-          requestId: v4() + "-xhr-id",
-        })),
-      });
+      this.options$.next(options);
     }
   };
 

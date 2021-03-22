@@ -1,17 +1,18 @@
 import "./App.css";
 import React from "react";
-// import useRxRequest from "./use-rxjs-requests/useRxJsRequest";
-// import useRxRequests from "./use-rxjs-requests/useRxJsRequests";
-// import { RxRequestConfig } from "./use-rxjs-requests";
+import useRxJsRequest from "./use-rxjs-requests/useRxJsRequest";
+import useRxJsRequests from "./use-rxjs-requests/useRxJsRequests";
+import { RxRequestConfig, RxRequestResult } from "./use-rxjs-requests";
 import { v4 } from "uuid";
-import {
-  RxRequestConfig,
-  useRxJsRequest,
-  useRxJsRequests,
-} from "use-rxjs-requests";
+// import {
+//   RxRequestConfig,
+//   useRxJsRequest,
+//   useRxJsRequests,
+// } from "use-rxjs-requests";
 
 function App() {
   const [config, setConfig] = React.useState<RxRequestConfig>({
+    requestId: "request-01",
     method: "put",
     url: "https://jsonplaceholder.typicode.com/todos/1",
     body: { uuid: v4(), body: { uuid: v4() } },
@@ -20,18 +21,21 @@ function App() {
 
   const [configs, setConfigs] = React.useState<RxRequestConfig[]>([
     {
+      requestId: "request-02",
       method: "put",
       url: "https://jsonplaceholder.typicode.com/todos/1",
       body: { uuid: v4(), body: { uuid: v4() } },
       params: { uuid: v4(), params: { uuid: v4() } },
     },
     {
+      requestId: "request-03",
       method: "put",
       url: "https://jsonplaceholder.typicode.com/todos/2",
       body: { uuid: v4(), body: { uuid: v4() } },
       params: { uuid: v4(), params: { uuid: v4() } },
     },
     {
+      requestId: "request-04",
       method: "put",
       url: "https://jsonplaceholder.typicode.com/todos/1/x",
       body: { uuid: v4(), body: { uuid: v4() } },
@@ -83,6 +87,7 @@ function App() {
         style={{ margin: 10 }}
         onClick={() => {
           setConfig({
+            requestId: "request-01",
             method: "put",
             url: "https://jsonplaceholder.typicode.com/todos/1",
             body: { uuid: v4(), body: { uuid: v4() } },
@@ -147,18 +152,28 @@ function App() {
         onClick={() => {
           setConfigs([
             {
+              requestId: "request-02",
               method: "put",
               url: "https://jsonplaceholder.typicode.com/todos/1",
               body: { uuid: v4(), body: { uuid: v4() } },
               params: { uuid: v4(), params: { uuid: v4() } },
             },
             {
+              requestId: "request-03",
               method: "put",
               url: "https://jsonplaceholder.typicode.com/todos/2",
               body: { uuid: v4(), body: { uuid: v4() } },
               params: { uuid: v4(), params: { uuid: v4() } },
             },
             {
+              requestId: "request-04",
+              method: "put",
+              url: "https://jsonplaceholder.typicode.com/todos/1/x",
+              body: { uuid: v4(), body: { uuid: v4() } },
+              params: { uuid: v4(), params: { uuid: v4() } },
+            },
+            {
+              requestId: "request-05",
               method: "put",
               url: "https://jsonplaceholder.typicode.com/todos/1/x",
               body: { uuid: v4(), body: { uuid: v4() } },

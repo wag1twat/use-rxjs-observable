@@ -2,8 +2,8 @@
 exports.__esModule = true;
 exports.IdleRxRequest = exports.LoadingRxRequest = exports.ErrorRxRequest = exports.SuccessRxRequest = void 0;
 var SuccessRxRequest = /** @class */ (function () {
-    function SuccessRxRequest(requestId, response, _a) {
-        var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
+    function SuccessRxRequest(response, _a) {
+        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = response;
         this.error = null;
@@ -19,8 +19,8 @@ var SuccessRxRequest = /** @class */ (function () {
 }());
 exports.SuccessRxRequest = SuccessRxRequest;
 var ErrorRxRequest = /** @class */ (function () {
-    function ErrorRxRequest(requestId, error, _a) {
-        var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
+    function ErrorRxRequest(error, _a) {
+        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = null;
         this.error = error;
@@ -36,8 +36,8 @@ var ErrorRxRequest = /** @class */ (function () {
 }());
 exports.ErrorRxRequest = ErrorRxRequest;
 var LoadingRxRequest = /** @class */ (function () {
-    function LoadingRxRequest(requestId, response, error, _a) {
-        var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
+    function LoadingRxRequest(response, error, _a) {
+        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = true;
         this.response = response;
         this.error = error;
@@ -53,11 +53,11 @@ var LoadingRxRequest = /** @class */ (function () {
 }());
 exports.LoadingRxRequest = LoadingRxRequest;
 var IdleRxRequest = /** @class */ (function () {
-    function IdleRxRequest(requestId, _a) {
-        var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
+    function IdleRxRequest(response, error, _a) {
+        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
-        this.response = null;
-        this.error = null;
+        this.response = response;
+        this.error = error;
         this.status = "idle";
         this.requestId = requestId;
         this.url = url;

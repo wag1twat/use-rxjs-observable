@@ -1,4 +1,4 @@
-import { BehaviorSubject, interval, Observable } from "rxjs";
+import { BehaviorSubject, interval, Observable, of } from "rxjs";
 import { equalObjects } from "../utils/equalObjects";
 import RequestSubscriber from "../RequestSubscriber";
 import {
@@ -11,7 +11,6 @@ import {
   RxUseRequestOptions,
   RxUseRequestState,
 } from "../types";
-import { v4 } from "uuid";
 import {
   distinctUntilChanged,
   map,
@@ -32,8 +31,6 @@ export default class RxRequest<Data, Error> extends Observable<
     Partial<RxRequestConfig & RxUseRequestOptions<Data, Error>>
   > = new BehaviorSubject({});
 
-  private requestId$: BehaviorSubject<string> = new BehaviorSubject(v4());
-
   private initialState$: BehaviorSubject<
     RxUseRequestState<Data, Error>
   > = new BehaviorSubject({} as RxUseRequestState<Data, Error>);
@@ -50,7 +47,11 @@ export default class RxRequest<Data, Error> extends Observable<
 
       observer.add(this.initialStateListener());
 
-      this.initialState$.next(this.getInitialState());
+      const initialState = this.getInitialState();
+
+      if (initialState) {
+        this.initialState$.next(initialState);
+      }
     });
 
     this.configure = this.configure.bind(this);
@@ -62,13 +63,21 @@ export default class RxRequest<Data, Error> extends Observable<
   }
 
   private getInitialState = () => {
-    const { method, url, body, params } = this.options$.getValue();
-    return new IdleRxRequest(this.requestId$.getValue(), {
-      method,
-      url,
-      body,
-      params,
-    });
+    const { requestId, method, url, body, params } = this.options$.getValue();
+
+    const state = this.state$.getValue();
+
+    if (requestId) {
+      return new IdleRxRequest(state.response, state.error, {
+        requestId,
+        method,
+        url,
+        body,
+        params,
+      });
+    }
+
+    return null;
   };
 
   private initialStateListener = () => {
@@ -105,7 +114,11 @@ export default class RxRequest<Data, Error> extends Observable<
     return this.options$
       .pipe(distinctUntilChanged())
       .subscribe(({ fetchOnMount, refetchInterval }) => {
-        this.state$.next(this.getInitialState());
+        const initialState = this.getInitialState();
+
+        if (initialState) {
+          this.state$.next(initialState);
+        }
 
         if (fetchOnMount && !refetchInterval) {
           this.fetch();
@@ -135,57 +148,57 @@ export default class RxRequest<Data, Error> extends Observable<
     if (config) {
       return this.options$
         .pipe(
-          map(({ method, url, body, params }) => {
+          map(({ requestId, method, url, body, params }) => {
             const state = this.state$.getValue();
 
-            return new Observable<RxRequestResult<Data, Error>>(
-              (observer) =>
-                new RequestSubscriber<Data, Error>(
-                  observer,
-                  {
-                    method,
-                    url,
-                    body,
-                    params,
-                    requestId: this.requestId$.getValue(),
-                    ...config,
-                  },
-                  state
-                )
-            );
+            if (requestId) {
+              return new Observable<RxRequestResult<Data, Error>>(
+                (observer) =>
+                  new RequestSubscriber<Data, Error>(
+                    observer,
+                    { requestId, method, url, body, params, ...config },
+                    state
+                  )
+              );
+            }
+
+            return of(null);
           }),
           mergeMap((v) => v),
           distinctUntilChanged()
         )
         .forEach((result) => {
-          this.state$.next(result);
+          if (result) {
+            this.state$.next(result);
+          }
         });
     }
 
     return this.options$
       .pipe(
-        map(({ method, url, body, params }) => {
+        map(({ requestId, method, url, body, params }) => {
           const state = this.state$.getValue();
-          return new Observable<RxRequestResult<Data, Error>>(
-            (observer) =>
-              new RequestSubscriber<Data, Error>(
-                observer,
-                {
-                  method,
-                  url,
-                  body,
-                  params,
-                  requestId: this.requestId$.getValue(),
-                },
-                state
-              )
-          );
+
+          if (requestId) {
+            return new Observable<RxRequestResult<Data, Error>>(
+              (observer) =>
+                new RequestSubscriber<Data, Error>(
+                  observer,
+                  { requestId, method, url, body, params },
+                  state
+                )
+            );
+          }
+
+          return of(null);
         }),
         mergeMap((v) => v),
         distinctUntilChanged()
       )
       .forEach((result) => {
-        this.state$.next(result);
+        if (result) {
+          this.state$.next(result);
+        }
       });
   };
 }

@@ -13,9 +13,8 @@ export class SuccessRxRequest<Data> implements RxRequestResult<Data, null> {
   readonly timestamp: Date;
 
   constructor(
-    requestId: string,
     response: RxRequestResult<Data, null>["response"],
-    { url, method, body, params }: RxRequestConfig
+    { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = false;
     this.response = response;
@@ -43,9 +42,8 @@ export class ErrorRxRequest<Error> implements RxRequestResult<null, Error> {
   readonly timestamp: Date;
 
   constructor(
-    requestId: string,
     error: RxRequestResult<null, Error>["error"],
-    { url, method, body, params }: RxRequestConfig
+    { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = false;
     this.response = null;
@@ -74,10 +72,9 @@ export class LoadingRxRequest<Data, Error>
   readonly timestamp: Date;
 
   constructor(
-    requestId: string,
     response: RxRequestResult<Data, Error>["response"],
     error: RxRequestResult<Data, Error>["error"],
-    { url, method, body, params }: RxRequestConfig
+    { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = true;
     this.response = response;
@@ -92,10 +89,11 @@ export class LoadingRxRequest<Data, Error>
   }
 }
 
-export class IdleRxRequest implements RxRequestResult<null, null> {
+export class IdleRxRequest<Data, Error>
+  implements RxRequestResult<Data, Error> {
   readonly isLoading: false;
-  readonly response: null;
-  readonly error: null;
+  readonly response: RxRequestResult<Data, Error>["response"];
+  readonly error: RxRequestResult<Data, Error>["error"];
   readonly status: "idle";
   readonly requestId: string;
   readonly url: RxRequestConfig["url"];
@@ -105,12 +103,13 @@ export class IdleRxRequest implements RxRequestResult<null, null> {
   readonly timestamp: Date;
 
   constructor(
-    requestId: string,
-    { url, method, body, params }: RxRequestConfig
+    response: RxRequestResult<Data, Error>["response"],
+    error: RxRequestResult<Data, Error>["error"],
+    { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = false;
-    this.response = null;
-    this.error = null;
+    this.response = response;
+    this.error = error;
     this.status = "idle";
     this.requestId = requestId;
     this.url = url;

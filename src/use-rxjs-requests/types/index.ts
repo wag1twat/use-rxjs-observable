@@ -16,11 +16,7 @@ import {
   UseRxRequestsValue,
   RxRequestsConfigure,
 } from "./requests";
-import {
-  RxRequestConfig,
-  RxRequestConfigRequestId,
-  RxRequestResult,
-} from "./utils";
+import { RxRequestConfig, RxRequestResult } from "./utils";
 export type {
   RxUseRequestOptions,
   RxRequestStateListener,
@@ -37,6 +33,5 @@ export type {
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestConfigRequestId,
   RxRequestResult,
 };

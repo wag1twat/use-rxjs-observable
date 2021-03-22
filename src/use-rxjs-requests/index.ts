@@ -16,7 +16,6 @@ import {
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestConfigRequestId,
   RxRequestResult,
 } from "./types";
 
@@ -36,7 +35,6 @@ export type {
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestConfigRequestId,
   RxRequestResult,
 };
 
