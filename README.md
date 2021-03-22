@@ -21,7 +21,6 @@ function App() {
   const [options, setOptions] = React.useState({
     refetchInterval: undefined,
     fetchOnMount: false,
-    fetchOnUpdateConfig: false,
     onSuccess: (success) => { // success: SuccessRequest
       console.log("success", success);
       },
@@ -55,7 +54,7 @@ import {
 import { v4 } from "uuid";
 
 function App() {
-  const [configs, setConfigs] = React.useState<RxRequestConfig>([{
+  const [configs, setConfigs] = React.useState<RxRequestConfig[]>([{
     method: "get",
     url: "https://jsonplaceholder.typicode.com/todos/1",
     body: { uuid: v4(), body: { uuid: v4() } },
@@ -65,7 +64,6 @@ function App() {
   const [options, setOptions] = React.useState({
     refetchInterval: undefined,
     fetchOnMount: false,
-    fetchOnUpdateConfig: false,
     onSuccess: (success) => { // success: SuccessRequest[]
       console.log("success", success);
       },
