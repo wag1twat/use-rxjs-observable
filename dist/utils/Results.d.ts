@@ -1,5 +1,5 @@
 import { RxRequestConfig, RxRequestResult } from "../types";
-export declare class SuccessRequest<Data> implements RxRequestResult<Data, null> {
+export declare class SuccessRxRequest<Data> implements RxRequestResult<Data, null> {
     readonly isLoading: false;
     readonly response: RxRequestResult<Data, null>["response"];
     readonly error: null;
@@ -12,7 +12,7 @@ export declare class SuccessRequest<Data> implements RxRequestResult<Data, null>
     readonly timestamp: Date;
     constructor(requestId: string, response: RxRequestResult<Data, null>["response"], { url, method, body, params }: RxRequestConfig);
 }
-export declare class ErrorRequest<Error> implements RxRequestResult<null, Error> {
+export declare class ErrorRxRequest<Error> implements RxRequestResult<null, Error> {
     readonly isLoading: false;
     readonly response: null;
     readonly error: RxRequestResult<null, Error>["error"];
@@ -25,7 +25,7 @@ export declare class ErrorRequest<Error> implements RxRequestResult<null, Error>
     readonly timestamp: Date;
     constructor(requestId: string, error: RxRequestResult<null, Error>["error"], { url, method, body, params }: RxRequestConfig);
 }
-export declare class LoadingRequest<Data, Error> implements RxRequestResult<Data, Error> {
+export declare class LoadingRxRequest<Data, Error> implements RxRequestResult<Data, Error> {
     readonly isLoading: true;
     readonly response: RxRequestResult<Data, Error>["response"];
     readonly error: RxRequestResult<Data, Error>["error"];
@@ -38,7 +38,7 @@ export declare class LoadingRequest<Data, Error> implements RxRequestResult<Data
     readonly timestamp: Date;
     constructor(requestId: string, response: RxRequestResult<Data, Error>["response"], error: RxRequestResult<Data, Error>["error"], { url, method, body, params }: RxRequestConfig);
 }
-export declare class IdleRequest implements RxRequestResult<null, null> {
+export declare class IdleRxRequest implements RxRequestResult<null, null> {
     readonly isLoading: false;
     readonly response: null;
     readonly error: null;

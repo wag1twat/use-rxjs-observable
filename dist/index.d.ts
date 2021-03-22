@@ -1,5 +1,5 @@
-import useRxRequest from "./useRxJsRequest";
-import useRxRequests from "./useRxJsRequests";
-import { BaseRxObservableConfig, MultiRxObservableConfig, SingleRxObservableStateListener, MultiRxObservableStateListener, SingleRxObservableConfig, RxRequestConfig, RxRequestResult, OnErrorUseRxRequests, OnSuccessUseRxRequests, OnSuccessUseRxRequest, OnErrorUseRxRequest, UseRxRequestsValue, UseRxRequestFetchFn, UseRxRequestValue, MultiRxObservableConfigure, SingleRxObservableConfigure, SingleRxObservableState, MultiRxObservableState } from "./types";
-export type { BaseRxObservableConfig, MultiRxObservableConfig, SingleRxObservableStateListener, MultiRxObservableStateListener, SingleRxObservableConfig, RxRequestConfig, RxRequestResult, OnErrorUseRxRequests, OnSuccessUseRxRequests, OnSuccessUseRxRequest, OnErrorUseRxRequest, UseRxRequestsValue, UseRxRequestFetchFn, UseRxRequestValue, MultiRxObservableConfigure, SingleRxObservableConfigure, SingleRxObservableState, MultiRxObservableState, };
-export { useRxRequests, useRxRequest };
+import useRxJsRequest from "./useRxJsRequest";
+import useRxJsRequests from "./useRxJsRequests";
+import { RxUseRequestOptions, RxRequestStateListener, RxUseRequestState, RxRequestOptionsListener, RxRequestFetchFn, UseRxRequestValue, RxRequestConfigure, RxUseRequestsOptions, RxRequestsStateListener, RxUseRequestsState, RxRequestsOptionsListener, RxRequestsFetchFn, UseRxRequestsValue, RxRequestsConfigure, RxRequestConfig, RxRequestConfigRequestId, RxRequestResult } from "./types";
+export type { RxUseRequestOptions, RxRequestStateListener, RxUseRequestState, RxRequestOptionsListener, RxRequestFetchFn, UseRxRequestValue, RxRequestConfigure, RxUseRequestsOptions, RxRequestsStateListener, RxUseRequestsState, RxRequestsOptionsListener, RxRequestsFetchFn, UseRxRequestsValue, RxRequestsConfigure, RxRequestConfig, RxRequestConfigRequestId, RxRequestResult, };
+export { useRxJsRequest, useRxJsRequests };

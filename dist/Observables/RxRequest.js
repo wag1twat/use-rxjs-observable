@@ -33,22 +33,22 @@ var RequestSubscriber_1 = __importDefault(require("../RequestSubscriber"));
 var uuid_1 = require("uuid");
 var operators_1 = require("rxjs/operators");
 var Results_1 = require("../utils/Results");
-var SingleObservable = /** @class */ (function (_super) {
-    __extends(SingleObservable, _super);
-    function SingleObservable() {
+var RxRequest = /** @class */ (function (_super) {
+    __extends(RxRequest, _super);
+    function RxRequest() {
         var _this = _super.call(this, function (observer) {
-            observer.add(_this.configurationListener(observer));
+            observer.add(_this.optionsListener(observer));
             observer.add(_this.stateListener(observer));
             observer.add(_this.initialStateListener());
             _this.initialState$.next(_this.getInitialState());
         }) || this;
-        _this.configuration$ = new rxjs_1.BehaviorSubject({});
+        _this.options$ = new rxjs_1.BehaviorSubject({});
         _this.requestId$ = new rxjs_1.BehaviorSubject(uuid_1.v4());
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
-            var _a = _this.configuration$.getValue(), method = _a.method, url = _a.url, body = _a.body, params = _a.params;
-            return new Results_1.IdleRequest(_this.requestId$.getValue(), {
+            var _a = _this.options$.getValue(), method = _a.method, url = _a.url, body = _a.body, params = _a.params;
+            return new Results_1.IdleRxRequest(_this.requestId$.getValue(), {
                 method: method,
                 url: url,
                 body: body,
@@ -61,8 +61,8 @@ var SingleObservable = /** @class */ (function (_super) {
                 .subscribe(function (initialState) { return _this.state$.next(initialState); });
         };
         _this.stateListener = function (observer) {
-            var onSuccess = _this.configuration$.getValue().onSuccess;
-            var onError = _this.configuration$.getValue().onError;
+            var onSuccess = _this.options$.getValue().onSuccess;
+            var onError = _this.options$.getValue().onError;
             return _this.state$
                 .pipe(operators_1.distinctUntilKeyChanged("status"))
                 .subscribe(function (state) {
@@ -79,8 +79,8 @@ var SingleObservable = /** @class */ (function (_super) {
                 observer.next(state);
             });
         };
-        _this.configurationListener = function (observer) {
-            return _this.configuration$
+        _this.optionsListener = function (observer) {
+            return _this.options$
                 .pipe(operators_1.distinctUntilChanged())
                 .subscribe(function (_a) {
                 var fetchOnMount = _a.fetchOnMount, refetchInterval = _a.refetchInterval;
@@ -94,15 +94,15 @@ var SingleObservable = /** @class */ (function (_super) {
                 }
             });
         };
-        _this.configure = function (configuration) {
-            var equal = equalObjects_1.equalObjects(_this.configuration$.getValue(), configuration);
+        _this.configure = function (options) {
+            var equal = equalObjects_1.equalObjects(_this.options$.getValue(), options);
             if (!equal) {
-                _this.configuration$.next(configuration);
+                _this.options$.next(options);
             }
         };
         _this.fetch = function (config) {
             if (config) {
-                return _this.configuration$
+                return _this.options$
                     .pipe(operators_1.map(function (_a) {
                     var method = _a.method, url = _a.url, body = _a.body, params = _a.params;
                     var state = _this.state$.getValue();
@@ -117,7 +117,7 @@ var SingleObservable = /** @class */ (function (_super) {
                     _this.state$.next(result);
                 });
             }
-            return _this.configuration$
+            return _this.options$
                 .pipe(operators_1.map(function (_a) {
                 var method = _a.method, url = _a.url, body = _a.body, params = _a.params;
                 var state = _this.state$.getValue();
@@ -136,13 +136,13 @@ var SingleObservable = /** @class */ (function (_super) {
             });
         };
         _this.configure = _this.configure.bind(_this);
-        _this.configurationListener = _this.configurationListener.bind(_this);
+        _this.optionsListener = _this.optionsListener.bind(_this);
         _this.getInitialState = _this.getInitialState.bind(_this);
         _this.initialStateListener = _this.initialStateListener.bind(_this);
         _this.stateListener = _this.stateListener.bind(_this);
         _this.fetch = _this.fetch.bind(_this);
         return _this;
     }
-    return SingleObservable;
+    return RxRequest;
 }(rxjs_1.Observable));
-exports["default"] = SingleObservable;
+exports["default"] = RxRequest;

@@ -1,8 +1,12 @@
 import { Observer, Subscriber } from "rxjs";
 import axios, { AxiosRequestConfig } from "axios";
-import { ErrorRequest, LoadingRequest, SuccessRequest } from "../utils/Results";
-import { RxRequestResult, RxRequestConfigRequestId } from "../types";
 import axiosCancel from "axios-cancel";
+import { RxRequestConfigRequestId, RxRequestResult } from "../types";
+import {
+  LoadingRxRequest,
+  SuccessRxRequest,
+  ErrorRxRequest,
+} from "../utils/Results";
 
 // @ts-ignore
 axiosCancel(axios);
@@ -60,7 +64,7 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
     const self = this;
 
     axios.interceptors.request.use(function (config: AxiosRequestConfig) {
-      const loadingRequest = new LoadingRequest<Data, Error>(
+      const loadingRxRequest = new LoadingRxRequest<Data, Error>(
         self.requestId,
         self.state.response,
         self.state.error,
@@ -72,7 +76,7 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
         }
       );
 
-      self.next(loadingRequest);
+      self.next(loadingRxRequest);
 
       return config;
     });
@@ -89,7 +93,7 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
         params: this.params,
       })
       .then((response) => {
-        const successRequest = new SuccessRequest<Data>(
+        const successRxRequest = new SuccessRxRequest<Data>(
           // @ts-ignore
           response.config.requestId,
           response,
@@ -101,13 +105,13 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
           }
         );
 
-        this.next(successRequest);
+        this.next(successRxRequest);
 
         this.complete();
       })
       .catch((error) => {
         if (error.config) {
-          const errorRequest = new ErrorRequest<Error>(
+          const errorRxRequest = new ErrorRxRequest<Error>(
             error.config.requestId,
             error,
             {
@@ -118,7 +122,7 @@ class RequestSubscribe<Data = any, Error = any> extends Subscriber<
             }
           );
 
-          this.next(errorRequest);
+          this.next(errorRxRequest);
 
           this.complete();
         }

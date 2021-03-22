@@ -35,25 +35,23 @@ var uuid_1 = require("uuid");
 var operators_1 = require("rxjs/operators");
 var equalArray_1 = require("../utils/equalArray");
 var Results_1 = require("../utils/Results");
-var MultiObservable = /** @class */ (function (_super) {
-    __extends(MultiObservable, _super);
-    function MultiObservable() {
+var RxRequests = /** @class */ (function (_super) {
+    __extends(RxRequests, _super);
+    function RxRequests() {
         var _this = _super.call(this, function (observer) {
-            observer.add(_this.configuration$
-                .pipe(operators_1.distinctUntilChanged())
-                .subscribe(_this.configurationListener(observer)));
+            observer.add(_this.optionsListener(observer));
             observer.add(_this.stateListener(observer));
             observer.add(_this.initialStateListener());
             _this.initialState$.next(_this.getInitialState());
             observer.add(_this.stateListenerOnResult());
         }) || this;
-        _this.configuration$ = new rxjs_1.BehaviorSubject({});
+        _this.options$ = new rxjs_1.BehaviorSubject({});
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
-            return lodash_1.reduce(_this.configuration$.getValue().configs, function (acc, mutableRequestConfig) {
+            return lodash_1.reduce(_this.options$.getValue().configs, function (acc, mutableRequestConfig) {
                 var _a;
-                return __assign(__assign({}, acc), (_a = {}, _a[mutableRequestConfig.requestId] = new Results_1.IdleRequest(mutableRequestConfig.requestId, mutableRequestConfig), _a));
+                return __assign(__assign({}, acc), (_a = {}, _a[mutableRequestConfig.requestId] = new Results_1.IdleRxRequest(mutableRequestConfig.requestId, mutableRequestConfig), _a));
             }, {});
         };
         _this.initialStateListener = function () {
@@ -89,8 +87,8 @@ var MultiObservable = /** @class */ (function (_super) {
             }), operators_1.distinctUntilChanged())
                 .subscribe(function (_a) {
                 var successes = _a.successes, errors = _a.errors;
-                var onSuccess = _this.configuration$.getValue().onSuccess;
-                var onError = _this.configuration$.getValue().onError;
+                var onSuccess = _this.options$.getValue().onSuccess;
+                var onError = _this.options$.getValue().onError;
                 if (onSuccess) {
                     if (successes.length) {
                         onSuccess(successes);
@@ -103,36 +101,38 @@ var MultiObservable = /** @class */ (function (_super) {
                 }
             });
         };
-        _this.configurationListener = function (observer) { return function (configuration) {
+        _this.optionsListener = function (observer) {
             _this.state$.next(_this.getInitialState());
-            var fetchOnMount = configuration.fetchOnMount, refetchInterval = configuration.refetchInterval;
-            if (fetchOnMount && !refetchInterval) {
-                _this.fetch();
-            }
-            if (!fetchOnMount && refetchInterval) {
-                observer.add(rxjs_1.interval(refetchInterval)
-                    .pipe(operators_1.startWith(0), operators_1.takeWhile(function () {
-                    return lodash_1.values(_this.state$.getValue()).every(function (result) { return result.status !== "loading"; });
-                }))
-                    .subscribe(function () { return _this.fetch(); }));
-            }
-        }; };
-        _this.configure = function (configuration) {
-            var equal = equalObjects_1.equalObjects(__assign(__assign({}, _this.configuration$.getValue()), { configs: lodash_1.map(_this.configuration$.getValue().configs, function (config) {
+            return _this.options$.pipe(operators_1.distinctUntilChanged()).subscribe(function (options) {
+                var fetchOnMount = options.fetchOnMount, refetchInterval = options.refetchInterval;
+                if (fetchOnMount && !refetchInterval) {
+                    _this.fetch();
+                }
+                if (!fetchOnMount && refetchInterval) {
+                    observer.add(rxjs_1.interval(refetchInterval)
+                        .pipe(operators_1.startWith(0), operators_1.takeWhile(function () {
+                        return lodash_1.values(_this.state$.getValue()).every(function (result) { return result.status !== "loading"; });
+                    }))
+                        .subscribe(function () { return _this.fetch(); }));
+                }
+            });
+        };
+        _this.configure = function (options) {
+            var equal = equalObjects_1.equalObjects(__assign(__assign({}, _this.options$.getValue()), { configs: lodash_1.map(_this.options$.getValue().configs, function (config) {
                     return lodash_1.omit(config, "requestId");
-                }) }), configuration);
+                }) }), options);
             if (!equal) {
-                _this.configuration$.next(__assign(__assign({}, configuration), { configs: lodash_1.map(configuration.configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); }) }));
+                _this.options$.next(__assign(__assign({}, options), { configs: lodash_1.map(options.configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); }) }));
             }
         };
         _this.fetch = function () {
-            var configs = _this.configuration$.getValue().configs;
+            var configs = _this.options$.getValue().configs;
             if (configs)
                 rxjs_1.from(configs)
                     .pipe(operators_1.map(function (config) {
                     var state = _this.state$.getValue()[config.requestId];
                     return new rxjs_1.Observable(function (observer) {
-                        return new RequestSubscriber_1["default"](observer, __assign(__assign({}, config), { body: { uuid: uuid_1.v4(), body: { uuid: uuid_1.v4() } }, params: { uuid: uuid_1.v4(), params: { uuid: uuid_1.v4() } } }), state);
+                        return new RequestSubscriber_1["default"](observer, config, state);
                     });
                 }), operators_1.mergeMap(function (observable) { return observable; }), operators_1.scan(function (acc, requestResult) {
                     var _a;
@@ -152,7 +152,7 @@ var MultiObservable = /** @class */ (function (_super) {
                     .forEach(function (result) { return _this.state$.next(result); });
         };
         _this.configure = _this.configure.bind(_this);
-        _this.configurationListener = _this.configurationListener.bind(_this);
+        _this.optionsListener = _this.optionsListener.bind(_this);
         _this.stateListenerOnResult = _this.stateListenerOnResult.bind(_this);
         _this.getInitialState = _this.getInitialState.bind(_this);
         _this.initialStateListener = _this.initialStateListener.bind(_this);
@@ -160,6 +160,6 @@ var MultiObservable = /** @class */ (function (_super) {
         _this.fetch = _this.fetch.bind(_this);
         return _this;
     }
-    return MultiObservable;
+    return RxRequests;
 }(rxjs_1.Observable));
-exports["default"] = MultiObservable;
+exports["default"] = RxRequests;

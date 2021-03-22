@@ -1,6 +1,6 @@
 import { RxRequestConfig, RxRequestResult } from "../types";
 
-export class SuccessRequest<Data> implements RxRequestResult<Data, null> {
+export class SuccessRxRequest<Data> implements RxRequestResult<Data, null> {
   readonly isLoading: false;
   readonly response: RxRequestResult<Data, null>["response"];
   readonly error: null;
@@ -30,7 +30,7 @@ export class SuccessRequest<Data> implements RxRequestResult<Data, null> {
   }
 }
 
-export class ErrorRequest<Error> implements RxRequestResult<null, Error> {
+export class ErrorRxRequest<Error> implements RxRequestResult<null, Error> {
   readonly isLoading: false;
   readonly response: null;
   readonly error: RxRequestResult<null, Error>["error"];
@@ -60,7 +60,7 @@ export class ErrorRequest<Error> implements RxRequestResult<null, Error> {
   }
 }
 
-export class LoadingRequest<Data, Error>
+export class LoadingRxRequest<Data, Error>
   implements RxRequestResult<Data, Error> {
   readonly isLoading: true;
   readonly response: RxRequestResult<Data, Error>["response"];
@@ -92,7 +92,7 @@ export class LoadingRequest<Data, Error>
   }
 }
 
-export class IdleRequest implements RxRequestResult<null, null> {
+export class IdleRxRequest implements RxRequestResult<null, null> {
   readonly isLoading: false;
   readonly response: null;
   readonly error: null;

@@ -1,8 +1,8 @@
 "use strict";
 exports.__esModule = true;
-exports.IdleRequest = exports.LoadingRequest = exports.ErrorRequest = exports.SuccessRequest = void 0;
-var SuccessRequest = /** @class */ (function () {
-    function SuccessRequest(requestId, response, _a) {
+exports.IdleRxRequest = exports.LoadingRxRequest = exports.ErrorRxRequest = exports.SuccessRxRequest = void 0;
+var SuccessRxRequest = /** @class */ (function () {
+    function SuccessRxRequest(requestId, response, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = response;
@@ -15,11 +15,11 @@ var SuccessRequest = /** @class */ (function () {
         this.params = params;
         this.timestamp = new Date();
     }
-    return SuccessRequest;
+    return SuccessRxRequest;
 }());
-exports.SuccessRequest = SuccessRequest;
-var ErrorRequest = /** @class */ (function () {
-    function ErrorRequest(requestId, error, _a) {
+exports.SuccessRxRequest = SuccessRxRequest;
+var ErrorRxRequest = /** @class */ (function () {
+    function ErrorRxRequest(requestId, error, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = null;
@@ -32,11 +32,11 @@ var ErrorRequest = /** @class */ (function () {
         this.params = params;
         this.timestamp = new Date();
     }
-    return ErrorRequest;
+    return ErrorRxRequest;
 }());
-exports.ErrorRequest = ErrorRequest;
-var LoadingRequest = /** @class */ (function () {
-    function LoadingRequest(requestId, response, error, _a) {
+exports.ErrorRxRequest = ErrorRxRequest;
+var LoadingRxRequest = /** @class */ (function () {
+    function LoadingRxRequest(requestId, response, error, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = true;
         this.response = response;
@@ -49,11 +49,11 @@ var LoadingRequest = /** @class */ (function () {
         this.params = params;
         this.timestamp = new Date();
     }
-    return LoadingRequest;
+    return LoadingRxRequest;
 }());
-exports.LoadingRequest = LoadingRequest;
-var IdleRequest = /** @class */ (function () {
-    function IdleRequest(requestId, _a) {
+exports.LoadingRxRequest = LoadingRxRequest;
+var IdleRxRequest = /** @class */ (function () {
+    function IdleRxRequest(requestId, _a) {
         var url = _a.url, method = _a.method, body = _a.body, params = _a.params;
         this.isLoading = false;
         this.response = null;
@@ -66,6 +66,6 @@ var IdleRequest = /** @class */ (function () {
         this.params = params;
         this.timestamp = new Date();
     }
-    return IdleRequest;
+    return IdleRxRequest;
 }());
-exports.IdleRequest = IdleRequest;
+exports.IdleRxRequest = IdleRxRequest;

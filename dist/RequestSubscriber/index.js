@@ -54,8 +54,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 var rxjs_1 = require("rxjs");
 var axios_1 = __importDefault(require("axios"));
-var Results_1 = require("../utils/Results");
 var axios_cancel_1 = __importDefault(require("axios-cancel"));
+var Results_1 = require("../utils/Results");
 // @ts-ignore
 axios_cancel_1["default"](axios_1["default"]);
 var RequestSubscribe = /** @class */ (function (_super) {
@@ -67,13 +67,13 @@ var RequestSubscribe = /** @class */ (function (_super) {
         _this.requestConfigure = function () {
             var self = _this;
             axios_1["default"].interceptors.request.use(function (config) {
-                var loadingRequest = new Results_1.LoadingRequest(self.requestId, self.state.response, self.state.error, {
+                var loadingRxRequest = new Results_1.LoadingRxRequest(self.requestId, self.state.response, self.state.error, {
                     url: self.url,
                     method: self.method,
                     body: self.body,
                     params: self.params
                 });
-                self.next(loadingRequest);
+                self.next(loadingRxRequest);
                 return config;
             });
         };
@@ -90,7 +90,7 @@ var RequestSubscribe = /** @class */ (function (_super) {
                         params: this.params
                     })
                         .then(function (response) {
-                        var successRequest = new Results_1.SuccessRequest(
+                        var successRxRequest = new Results_1.SuccessRxRequest(
                         // @ts-ignore
                         response.config.requestId, response, {
                             url: _this.url,
@@ -98,17 +98,17 @@ var RequestSubscribe = /** @class */ (function (_super) {
                             body: _this.body,
                             params: _this.params
                         });
-                        _this.next(successRequest);
+                        _this.next(successRxRequest);
                         _this.complete();
                     })["catch"](function (error) {
                         if (error.config) {
-                            var errorRequest = new Results_1.ErrorRequest(error.config.requestId, error, {
+                            var errorRxRequest = new Results_1.ErrorRxRequest(error.config.requestId, error, {
                                 url: _this.url,
                                 method: _this.method,
                                 body: _this.body,
                                 params: _this.params
                             });
-                            _this.next(errorRequest);
+                            _this.next(errorRxRequest);
                             _this.complete();
                         }
                         return null;

@@ -3,13 +3,13 @@ import { equalObjects } from "../utils/equalObjects";
 import RequestSubscriber from "../RequestSubscriber";
 import {
   RxRequestResult,
-  SingleRxObservableConfigure,
-  SingleRxObservableConfig,
-  UseRxRequestFetchFn,
-  SingleRxObservableStateListener,
-  SingleRxObservableState,
+  RxRequestConfigure,
+  RxRequestFetchFn,
+  RxRequestStateListener,
   RxRequestConfig,
-  SingleObservableConfigurationListener,
+  RxRequestOptionsListener,
+  RxUseRequestOptions,
+  RxUseRequestState,
 } from "../types";
 import { v4 } from "uuid";
 import {
@@ -20,28 +20,32 @@ import {
   startWith,
   takeWhile,
 } from "rxjs/operators";
-import { ErrorRequest, IdleRequest, SuccessRequest } from "../utils/Results";
+import {
+  ErrorRxRequest,
+  IdleRxRequest,
+  SuccessRxRequest,
+} from "../utils/Results";
 
-export default class SingleObservable<Data, Error> extends Observable<
+export default class RxRequest<Data, Error> extends Observable<
   RxRequestResult<Data, Error>
 > {
-  private configuration$: BehaviorSubject<
-    Partial<RxRequestConfig & SingleRxObservableConfig<Data, Error>>
+  private options$: BehaviorSubject<
+    Partial<RxRequestConfig & RxUseRequestOptions<Data, Error>>
   > = new BehaviorSubject({});
 
   private requestId$: BehaviorSubject<string> = new BehaviorSubject(v4());
 
   private initialState$: BehaviorSubject<
-    SingleRxObservableState<Data, Error>
-  > = new BehaviorSubject({} as SingleRxObservableState<Data, Error>);
+    RxUseRequestState<Data, Error>
+  > = new BehaviorSubject({} as RxUseRequestState<Data, Error>);
 
   private state$: BehaviorSubject<
-    SingleRxObservableState<Data, Error>
-  > = new BehaviorSubject({} as SingleRxObservableState<Data, Error>);
+    RxUseRequestState<Data, Error>
+  > = new BehaviorSubject({} as RxUseRequestState<Data, Error>);
 
   constructor() {
     super((observer) => {
-      observer.add(this.configurationListener(observer));
+      observer.add(this.optionsListener(observer));
 
       observer.add(this.stateListener(observer));
 
@@ -51,7 +55,7 @@ export default class SingleObservable<Data, Error> extends Observable<
     });
 
     this.configure = this.configure.bind(this);
-    this.configurationListener = this.configurationListener.bind(this);
+    this.optionsListener = this.optionsListener.bind(this);
     this.getInitialState = this.getInitialState.bind(this);
     this.initialStateListener = this.initialStateListener.bind(this);
     this.stateListener = this.stateListener.bind(this);
@@ -59,8 +63,8 @@ export default class SingleObservable<Data, Error> extends Observable<
   }
 
   private getInitialState = () => {
-    const { method, url, body, params } = this.configuration$.getValue();
-    return new IdleRequest(this.requestId$.getValue(), {
+    const { method, url, body, params } = this.options$.getValue();
+    return new IdleRxRequest(this.requestId$.getValue(), {
       method,
       url,
       body,
@@ -74,25 +78,23 @@ export default class SingleObservable<Data, Error> extends Observable<
       .subscribe((initialState) => this.state$.next(initialState));
   };
 
-  private stateListener: SingleRxObservableStateListener<Data, Error> = (
-    observer
-  ) => {
-    const onSuccess = this.configuration$.getValue().onSuccess;
+  private stateListener: RxRequestStateListener<Data, Error> = (observer) => {
+    const onSuccess = this.options$.getValue().onSuccess;
 
-    const onError = this.configuration$.getValue().onError;
+    const onError = this.options$.getValue().onError;
 
     return this.state$
       .pipe(distinctUntilKeyChanged("status"))
       .subscribe((state) => {
         if (onSuccess) {
           if (state.status === "success") {
-            onSuccess(state as SuccessRequest<Data>);
+            onSuccess(state as SuccessRxRequest<Data>);
           }
         }
 
         if (onError) {
           if (state.status === "error") {
-            onError(state as ErrorRequest<Error>);
+            onError(state as ErrorRxRequest<Error>);
           }
         }
 
@@ -100,11 +102,10 @@ export default class SingleObservable<Data, Error> extends Observable<
       });
   };
 
-  private configurationListener: SingleObservableConfigurationListener<
-    Data,
-    Error
-  > = (observer) => {
-    return this.configuration$
+  private optionsListener: RxRequestOptionsListener<Data, Error> = (
+    observer
+  ) => {
+    return this.options$
       .pipe(distinctUntilChanged())
       .subscribe(({ fetchOnMount, refetchInterval }) => {
         if (fetchOnMount && !refetchInterval) {
@@ -124,18 +125,16 @@ export default class SingleObservable<Data, Error> extends Observable<
       });
   };
 
-  public configure: SingleRxObservableConfigure<Data, Error> = (
-    configuration
-  ) => {
-    const equal = equalObjects(this.configuration$.getValue(), configuration);
+  public configure: RxRequestConfigure<Data, Error> = (options) => {
+    const equal = equalObjects(this.options$.getValue(), options);
     if (!equal) {
-      this.configuration$.next(configuration);
+      this.options$.next(options);
     }
   };
 
-  public fetch: UseRxRequestFetchFn = (config) => {
+  public fetch: RxRequestFetchFn = (config) => {
     if (config) {
-      return this.configuration$
+      return this.options$
         .pipe(
           map(({ method, url, body, params }) => {
             const state = this.state$.getValue();
@@ -164,7 +163,7 @@ export default class SingleObservable<Data, Error> extends Observable<
         });
     }
 
-    return this.configuration$
+    return this.options$
       .pipe(
         map(({ method, url, body, params }) => {
           const state = this.state$.getValue();
