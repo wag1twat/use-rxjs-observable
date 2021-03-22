@@ -139,6 +139,7 @@ export default class RxRequest<Data, Error> extends Observable<
 
   public configure: RxRequestConfigure<Data, Error> = (options) => {
     const equal = equalObjects(this.options$.getValue(), options);
+
     if (!equal) {
       this.options$.next(options);
     }

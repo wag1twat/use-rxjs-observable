@@ -13,7 +13,7 @@ export class SuccessRxRequest<Data> implements RxRequestResult<Data, null> {
   readonly timestamp: Date;
 
   constructor(
-    response: RxRequestResult<Data, null>["response"],
+    response: RxRequestResult<Data, null>["response"] = null,
     { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = false;
@@ -42,7 +42,7 @@ export class ErrorRxRequest<Error> implements RxRequestResult<null, Error> {
   readonly timestamp: Date;
 
   constructor(
-    error: RxRequestResult<null, Error>["error"],
+    error: RxRequestResult<null, Error>["error"] = null,
     { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = false;
@@ -72,8 +72,8 @@ export class LoadingRxRequest<Data, Error>
   readonly timestamp: Date;
 
   constructor(
-    response: RxRequestResult<Data, Error>["response"],
-    error: RxRequestResult<Data, Error>["error"],
+    response: RxRequestResult<Data, Error>["response"] = null,
+    error: RxRequestResult<Data, Error>["error"] = null,
     { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = true;
@@ -103,8 +103,8 @@ export class IdleRxRequest<Data, Error>
   readonly timestamp: Date;
 
   constructor(
-    response: RxRequestResult<Data, Error>["response"],
-    error: RxRequestResult<Data, Error>["error"],
+    response: RxRequestResult<Data, Error>["response"] = null,
+    error: RxRequestResult<Data, Error>["error"] = null,
     { requestId, url, method, body, params }: RxRequestConfig
   ) {
     this.isLoading = false;

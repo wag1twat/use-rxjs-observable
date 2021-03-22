@@ -57,6 +57,9 @@ export default function useRxJsRequest<Data = any, Error = any>(
 
   return {
     state,
-    fetch: useCallback((config) => observable.fetch(config), [observable]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetch: useCallback((config) => observable.fetch(config), [
+      observable.fetch,
+    ]),
   };
 }

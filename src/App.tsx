@@ -1,14 +1,14 @@
 import "./App.css";
 import React from "react";
-// import useRxJsRequest from "./use-rxjs-requests/useRxJsRequest";
-// import useRxJsRequests from "./use-rxjs-requests/useRxJsRequests";
-// import { RxRequestConfig } from "./use-rxjs-requests";
+import useRxJsRequest from "./use-rxjs-requests/useRxJsRequest";
+import useRxJsRequests from "./use-rxjs-requests/useRxJsRequests";
+import { RxRequestConfig } from "./use-rxjs-requests";
 import { v4 } from "uuid";
-import {
-  RxRequestConfig,
-  useRxJsRequest,
-  useRxJsRequests,
-} from "use-rxjs-requests";
+// import {
+//   RxRequestConfig,
+//   useRxJsRequest,
+//   useRxJsRequests,
+// } from "use-rxjs-requests";
 
 function App() {
   const [config, setConfig] = React.useState<RxRequestConfig>({
@@ -125,7 +125,7 @@ function App() {
             style={{ display: "flex", flexDirection: "column", padding: 10 }}
           >
             <div style={{ color: "red" }}>DATA</div>
-            <code>{JSON.stringify(state.response?.data, null, 2)}</code>
+            <code>{JSON.stringify(state.response, null, 2)}</code>
           </div>
           <div
             style={{ display: "flex", flexDirection: "column", padding: 10 }}
@@ -213,7 +213,7 @@ function App() {
               style={{ display: "flex", flexDirection: "column", padding: 10 }}
             >
               <div style={{ color: "red" }}>DATA</div>
-              <code>{JSON.stringify(res.response?.data, null, 2)}</code>
+              <code>{JSON.stringify(res.response, null, 2)}</code>
             </div>
             <div
               style={{ display: "flex", flexDirection: "column", padding: 10 }}
