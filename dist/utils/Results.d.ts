@@ -10,7 +10,7 @@ export declare class SuccessRxRequest<Data> implements RxRequestResult<Data, nul
     readonly body: RxRequestConfig["body"];
     readonly params: RxRequestConfig["params"];
     readonly timestamp: Date;
-    constructor(requestId: string, response: RxRequestResult<Data, null>["response"], { url, method, body, params }: RxRequestConfig);
+    constructor(response: RxRequestResult<Data, null>["response"], { requestId, url, method, body, params }: RxRequestConfig);
 }
 export declare class ErrorRxRequest<Error> implements RxRequestResult<null, Error> {
     readonly isLoading: false;
@@ -23,7 +23,7 @@ export declare class ErrorRxRequest<Error> implements RxRequestResult<null, Erro
     readonly body: RxRequestConfig["body"];
     readonly params: RxRequestConfig["params"];
     readonly timestamp: Date;
-    constructor(requestId: string, error: RxRequestResult<null, Error>["error"], { url, method, body, params }: RxRequestConfig);
+    constructor(error: RxRequestResult<null, Error>["error"], { requestId, url, method, body, params }: RxRequestConfig);
 }
 export declare class LoadingRxRequest<Data, Error> implements RxRequestResult<Data, Error> {
     readonly isLoading: true;
@@ -36,12 +36,12 @@ export declare class LoadingRxRequest<Data, Error> implements RxRequestResult<Da
     readonly body: RxRequestConfig["body"];
     readonly params: RxRequestConfig["params"];
     readonly timestamp: Date;
-    constructor(requestId: string, response: RxRequestResult<Data, Error>["response"], error: RxRequestResult<Data, Error>["error"], { url, method, body, params }: RxRequestConfig);
+    constructor(response: RxRequestResult<Data, Error>["response"], error: RxRequestResult<Data, Error>["error"], { requestId, url, method, body, params }: RxRequestConfig);
 }
-export declare class IdleRxRequest implements RxRequestResult<null, null> {
+export declare class IdleRxRequest<Data, Error> implements RxRequestResult<Data, Error> {
     readonly isLoading: false;
-    readonly response: null;
-    readonly error: null;
+    readonly response: RxRequestResult<Data, Error>["response"];
+    readonly error: RxRequestResult<Data, Error>["error"];
     readonly status: "idle";
     readonly requestId: string;
     readonly url: RxRequestConfig["url"];
@@ -49,5 +49,5 @@ export declare class IdleRxRequest implements RxRequestResult<null, null> {
     readonly body: RxRequestConfig["body"];
     readonly params: RxRequestConfig["params"];
     readonly timestamp: Date;
-    constructor(requestId: string, { url, method, body, params }: RxRequestConfig);
+    constructor(response: RxRequestResult<Data, Error>["response"], error: RxRequestResult<Data, Error>["error"], { requestId, url, method, body, params }: RxRequestConfig);
 }

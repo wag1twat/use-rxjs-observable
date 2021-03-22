@@ -30,7 +30,6 @@ exports.__esModule = true;
 var rxjs_1 = require("rxjs");
 var equalObjects_1 = require("../utils/equalObjects");
 var RequestSubscriber_1 = __importDefault(require("../RequestSubscriber"));
-var uuid_1 = require("uuid");
 var operators_1 = require("rxjs/operators");
 var Results_1 = require("../utils/Results");
 var RxRequest = /** @class */ (function (_super) {
@@ -40,20 +39,27 @@ var RxRequest = /** @class */ (function (_super) {
             observer.add(_this.optionsListener(observer));
             observer.add(_this.stateListener(observer));
             observer.add(_this.initialStateListener());
-            _this.initialState$.next(_this.getInitialState());
+            var initialState = _this.getInitialState();
+            if (initialState) {
+                _this.initialState$.next(initialState);
+            }
         }) || this;
         _this.options$ = new rxjs_1.BehaviorSubject({});
-        _this.requestId$ = new rxjs_1.BehaviorSubject(uuid_1.v4());
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
-            var _a = _this.options$.getValue(), method = _a.method, url = _a.url, body = _a.body, params = _a.params;
-            return new Results_1.IdleRxRequest(_this.requestId$.getValue(), {
-                method: method,
-                url: url,
-                body: body,
-                params: params
-            });
+            var _a = _this.options$.getValue(), requestId = _a.requestId, method = _a.method, url = _a.url, body = _a.body, params = _a.params;
+            var state = _this.state$.getValue();
+            if (requestId) {
+                return new Results_1.IdleRxRequest(state.response, state.error, {
+                    requestId: requestId,
+                    method: method,
+                    url: url,
+                    body: body,
+                    params: params
+                });
+            }
+            return null;
         };
         _this.initialStateListener = function () {
             return _this.initialState$
@@ -82,7 +88,10 @@ var RxRequest = /** @class */ (function (_super) {
                 .pipe(operators_1.distinctUntilChanged())
                 .subscribe(function (_a) {
                 var fetchOnMount = _a.fetchOnMount, refetchInterval = _a.refetchInterval;
-                _this.state$.next(_this.getInitialState());
+                var initialState = _this.getInitialState();
+                if (initialState) {
+                    _this.state$.next(initialState);
+                }
                 if (fetchOnMount && !refetchInterval) {
                     _this.fetch();
                 }
@@ -103,35 +112,36 @@ var RxRequest = /** @class */ (function (_super) {
             if (config) {
                 return _this.options$
                     .pipe(operators_1.map(function (_a) {
-                    var method = _a.method, url = _a.url, body = _a.body, params = _a.params;
+                    var requestId = _a.requestId, method = _a.method, url = _a.url, body = _a.body, params = _a.params;
                     var state = _this.state$.getValue();
-                    return new rxjs_1.Observable(function (observer) {
-                        return new RequestSubscriber_1["default"](observer, __assign({ method: method,
-                            url: url,
-                            body: body,
-                            params: params, requestId: _this.requestId$.getValue() }, config), state);
-                    });
+                    if (requestId) {
+                        return new rxjs_1.Observable(function (observer) {
+                            return new RequestSubscriber_1["default"](observer, __assign({ requestId: requestId, method: method, url: url, body: body, params: params }, config), state);
+                        });
+                    }
+                    return rxjs_1.of(null);
                 }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilChanged())
                     .forEach(function (result) {
-                    _this.state$.next(result);
+                    if (result) {
+                        _this.state$.next(result);
+                    }
                 });
             }
             return _this.options$
                 .pipe(operators_1.map(function (_a) {
-                var method = _a.method, url = _a.url, body = _a.body, params = _a.params;
+                var requestId = _a.requestId, method = _a.method, url = _a.url, body = _a.body, params = _a.params;
                 var state = _this.state$.getValue();
-                return new rxjs_1.Observable(function (observer) {
-                    return new RequestSubscriber_1["default"](observer, {
-                        method: method,
-                        url: url,
-                        body: body,
-                        params: params,
-                        requestId: _this.requestId$.getValue()
-                    }, state);
-                });
+                if (requestId) {
+                    return new rxjs_1.Observable(function (observer) {
+                        return new RequestSubscriber_1["default"](observer, { requestId: requestId, method: method, url: url, body: body, params: params }, state);
+                    });
+                }
+                return rxjs_1.of(null);
             }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilChanged())
                 .forEach(function (result) {
-                _this.state$.next(result);
+                if (result) {
+                    _this.state$.next(result);
+                }
             });
         };
         _this.configure = _this.configure.bind(_this);

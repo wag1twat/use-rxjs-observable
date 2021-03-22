@@ -2,7 +2,6 @@ import { Observable } from "rxjs";
 import { RxRequestResult, RxRequestConfigure, RxRequestFetchFn } from "../types";
 export default class RxRequest<Data, Error> extends Observable<RxRequestResult<Data, Error>> {
     private options$;
-    private requestId$;
     private initialState$;
     private state$;
     constructor();

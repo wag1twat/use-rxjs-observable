@@ -31,7 +31,6 @@ var rxjs_1 = require("rxjs");
 var equalObjects_1 = require("../utils/equalObjects");
 var RequestSubscriber_1 = __importDefault(require("../RequestSubscriber"));
 var lodash_1 = require("lodash");
-var uuid_1 = require("uuid");
 var operators_1 = require("rxjs/operators");
 var equalArray_1 = require("../utils/equalArray");
 var Results_1 = require("../utils/Results");
@@ -49,9 +48,14 @@ var RxRequests = /** @class */ (function (_super) {
         _this.initialState$ = new rxjs_1.BehaviorSubject({});
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.getInitialState = function () {
+            var state = _this.state$.getValue();
             return lodash_1.reduce(_this.options$.getValue().configs, function (acc, mutableRequestConfig) {
-                var _a;
-                return __assign(__assign({}, acc), (_a = {}, _a[mutableRequestConfig.requestId] = new Results_1.IdleRxRequest(mutableRequestConfig.requestId, mutableRequestConfig), _a));
+                var _a, _b;
+                var exist = state[mutableRequestConfig.requestId];
+                if (exist) {
+                    return __assign(__assign({}, acc), (_a = {}, _a[mutableRequestConfig.requestId] = new Results_1.IdleRxRequest(exist.response, exist.error, mutableRequestConfig), _a));
+                }
+                return __assign(__assign({}, acc), (_b = {}, _b[mutableRequestConfig.requestId] = new Results_1.IdleRxRequest(null, null, mutableRequestConfig), _b));
             }, {});
         };
         _this.initialStateListener = function () {
@@ -118,11 +122,9 @@ var RxRequests = /** @class */ (function (_super) {
             });
         };
         _this.configure = function (options) {
-            var equal = equalObjects_1.equalObjects(__assign(__assign({}, _this.options$.getValue()), { configs: lodash_1.map(_this.options$.getValue().configs, function (config) {
-                    return lodash_1.omit(config, "requestId");
-                }) }), options);
+            var equal = equalObjects_1.equalObjects(_this.options$.getValue(), options);
             if (!equal) {
-                _this.options$.next(__assign(__assign({}, options), { configs: lodash_1.map(options.configs, function (config) { return (__assign(__assign({}, config), { requestId: uuid_1.v4() + "-xhr-id" })); }) }));
+                _this.options$.next(options);
             }
         };
         _this.fetch = function () {

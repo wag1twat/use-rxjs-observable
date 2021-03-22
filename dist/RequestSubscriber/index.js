@@ -67,7 +67,8 @@ var RequestSubscribe = /** @class */ (function (_super) {
         _this.requestConfigure = function () {
             var self = _this;
             axios_1["default"].interceptors.request.use(function (config) {
-                var loadingRxRequest = new Results_1.LoadingRxRequest(self.requestId, self.state.response, self.state.error, {
+                var loadingRxRequest = new Results_1.LoadingRxRequest(self.state.response, self.state.error, {
+                    requestId: self.requestId,
                     url: self.url,
                     method: self.method,
                     body: self.body,
@@ -90,9 +91,8 @@ var RequestSubscribe = /** @class */ (function (_super) {
                         params: this.params
                     })
                         .then(function (response) {
-                        var successRxRequest = new Results_1.SuccessRxRequest(
-                        // @ts-ignore
-                        response.config.requestId, response, {
+                        var successRxRequest = new Results_1.SuccessRxRequest(response, {
+                            requestId: _this.requestId,
                             url: _this.url,
                             method: _this.method,
                             body: _this.body,
@@ -102,7 +102,8 @@ var RequestSubscribe = /** @class */ (function (_super) {
                         _this.complete();
                     })["catch"](function (error) {
                         if (error.config) {
-                            var errorRxRequest = new Results_1.ErrorRxRequest(error.config.requestId, error, {
+                            var errorRxRequest = new Results_1.ErrorRxRequest(error, {
+                                requestId: _this.requestId,
                                 url: _this.url,
                                 method: _this.method,
                                 body: _this.body,
