@@ -1,14 +1,14 @@
 import "./App.css";
 import React from "react";
-import {
-  RxRequestConfig,
-  useRxRequest,
-  useRxRequests,
-} from "use-rxjs-requests";
+import useRxRequest from "./use-rxjs-requests/useRxJsRequest";
+import useRxRequests from "./use-rxjs-requests/useRxJsRequests";
+import { RxRequestConfig } from "./use-rxjs-requests";
 import { v4 } from "uuid";
 
 function App() {
-  const [config, setConfig] = React.useState({
+  const [config, setConfig] = React.useState<RxRequestConfig>({
+    method: "put",
+    url: "https://jsonplaceholder.typicode.com/todos/1",
     body: { uuid: v4(), body: { uuid: v4() } },
     params: { uuid: v4(), params: { uuid: v4() } },
   });
@@ -34,31 +34,20 @@ function App() {
     },
   ]);
 
-  const { state, fetch } = useRxRequest(
-    {
-      method: "put",
-      url: "https://jsonplaceholder.typicode.com/todos/1",
-      ...config,
+  const { state, fetch } = useRxRequest(config, {
+    refetchInterval: undefined,
+    fetchOnMount: false,
+    onSuccess: (success) => {
+      console.log("success", success);
     },
-    {
-      refetchInterval: undefined,
-      fetchOnMount: false,
-      onSuccess: (success) => {
-        console.log("success", success);
-      },
-      onError: (error) => {
-        console.log("error", error);
-      },
-    }
-    // (success) => {
-    //   console.log("success", success);
-    // },
-    // (error) => {
-    //   console.log("error", error);
-    // }
-  );
+    onError: (error) => {
+      console.log("error", error);
+    },
+  });
 
   const { state: result, fetch: request } = useRxRequests(configs, {
+    refetchInterval: undefined,
+    fetchOnMount: false,
     onSuccess: (success) => {
       console.log("success", success);
     },
@@ -89,6 +78,8 @@ function App() {
         style={{ margin: 10 }}
         onClick={() => {
           setConfig({
+            method: "put",
+            url: "https://jsonplaceholder.typicode.com/todos/1",
             body: { uuid: v4(), body: { uuid: v4() } },
             params: { uuid: v4(), params: { uuid: v4() } },
           });

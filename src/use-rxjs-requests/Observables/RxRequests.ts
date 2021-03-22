@@ -28,6 +28,7 @@ import {
   takeWhile,
   distinctUntilChanged,
   concatMap,
+  tap,
 } from "rxjs/operators";
 import { equalArray } from "../utils/equalArray";
 import {
@@ -143,9 +144,9 @@ export default class RxRequests<Data, Error> extends Observable<
   private optionsListener: RxRequestsOptionsListener<Data, Error> = (
     observer
   ) => {
-    this.state$.next(this.getInitialState());
-
     return this.options$.pipe(distinctUntilChanged()).subscribe((options) => {
+      this.state$.next(this.getInitialState());
+
       const { fetchOnMount, refetchInterval } = options;
 
       if (fetchOnMount && !refetchInterval) {

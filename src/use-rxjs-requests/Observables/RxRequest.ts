@@ -14,7 +14,6 @@ import {
 import { v4 } from "uuid";
 import {
   distinctUntilChanged,
-  distinctUntilKeyChanged,
   map,
   mergeMap,
   startWith,
@@ -74,7 +73,7 @@ export default class RxRequest<Data, Error> extends Observable<
 
   private initialStateListener = () => {
     return this.initialState$
-      .pipe(distinctUntilKeyChanged("status"))
+      .pipe(distinctUntilChanged())
       .subscribe((initialState) => this.state$.next(initialState));
   };
 
@@ -83,23 +82,21 @@ export default class RxRequest<Data, Error> extends Observable<
 
     const onError = this.options$.getValue().onError;
 
-    return this.state$
-      .pipe(distinctUntilKeyChanged("status"))
-      .subscribe((state) => {
-        if (onSuccess) {
-          if (state.status === "success") {
-            onSuccess(state as SuccessRxRequest<Data>);
-          }
+    return this.state$.pipe(distinctUntilChanged()).subscribe((state) => {
+      if (onSuccess) {
+        if (state.status === "success") {
+          onSuccess(state as SuccessRxRequest<Data>);
         }
+      }
 
-        if (onError) {
-          if (state.status === "error") {
-            onError(state as ErrorRxRequest<Error>);
-          }
+      if (onError) {
+        if (state.status === "error") {
+          onError(state as ErrorRxRequest<Error>);
         }
+      }
 
-        observer.next(state);
-      });
+      observer.next(state);
+    });
   };
 
   private optionsListener: RxRequestOptionsListener<Data, Error> = (
@@ -108,6 +105,8 @@ export default class RxRequest<Data, Error> extends Observable<
     return this.options$
       .pipe(distinctUntilChanged())
       .subscribe(({ fetchOnMount, refetchInterval }) => {
+        this.state$.next(this.getInitialState());
+
         if (fetchOnMount && !refetchInterval) {
           this.fetch();
         }
@@ -156,7 +155,7 @@ export default class RxRequest<Data, Error> extends Observable<
             );
           }),
           mergeMap((v) => v),
-          distinctUntilKeyChanged("status")
+          distinctUntilChanged()
         )
         .forEach((result) => {
           this.state$.next(result);
@@ -183,7 +182,7 @@ export default class RxRequest<Data, Error> extends Observable<
           );
         }),
         mergeMap((v) => v),
-        distinctUntilKeyChanged("status")
+        distinctUntilChanged()
       )
       .forEach((result) => {
         this.state$.next(result);
