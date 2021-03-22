@@ -6,8 +6,8 @@
 import React from "react";
 import {
   RxRequestConfig,
-  useRxRequest,
-} from "./use-rxjs-requests";
+  useRxJsRequest,
+} from "use-rxjs-requests";
 import { v4 } from "uuid";
 
 function App() {
@@ -29,7 +29,7 @@ function App() {
     },
   });
 
-  const { state, fetch } = useRxRequest(config, options);
+  const { state, fetch } = useRxJsRequest(config, options);
 
   React.useEffect(() => {
     fetch();
@@ -49,8 +49,8 @@ function App() {
 import React from "react";
 import {
   RxRequestConfig,
-  useRxRequests,
-} from "./use-rxjs-requests";
+  useRxJsRequests,
+} from "use-rxjs-requests";
 import { v4 } from "uuid";
 
 function App() {
@@ -72,7 +72,7 @@ function App() {
     },
   });
 
-  const { state, fetch } = useRxRequests(configs, options);
+  const { state, fetch } = useRxJsRequests(configs, options);
 
   React.useEffect(() => {
     fetch();
