@@ -1,5 +1,5 @@
 import { Observer, Subscriber } from "rxjs";
-import { RxRequestResult, RxRequestConfigRequestId } from "../types";
+import { RxRequestConfigRequestId, RxRequestResult } from "../types";
 declare class RequestSubscribe<Data = any, Error = any> extends Subscriber<RxRequestResult<Data, Error>> {
     private requestId;
     private url;
