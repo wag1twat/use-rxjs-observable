@@ -1,9 +1,14 @@
 import "./App.css";
 import React from "react";
-import useRxRequest from "./use-rxjs-requests/useRxJsRequest";
-import useRxRequests from "./use-rxjs-requests/useRxJsRequests";
-import { RxRequestConfig } from "./use-rxjs-requests";
+// import useRxRequest from "./use-rxjs-requests/useRxJsRequest";
+// import useRxRequests from "./use-rxjs-requests/useRxJsRequests";
+// import { RxRequestConfig } from "./use-rxjs-requests";
 import { v4 } from "uuid";
+import {
+  RxRequestConfig,
+  useRxJsRequest,
+  useRxJsRequests,
+} from "use-rxjs-requests";
 
 function App() {
   const [config, setConfig] = React.useState<RxRequestConfig>({
@@ -34,7 +39,7 @@ function App() {
     },
   ]);
 
-  const { state, fetch } = useRxRequest(config, {
+  const { state, fetch } = useRxJsRequest(config, {
     refetchInterval: undefined,
     fetchOnMount: false,
     onSuccess: (success) => {
@@ -45,7 +50,7 @@ function App() {
     },
   });
 
-  const { state: result, fetch: request } = useRxRequests(configs, {
+  const { state: result, fetch: request } = useRxJsRequests(configs, {
     refetchInterval: undefined,
     fetchOnMount: false,
     onSuccess: (success) => {
