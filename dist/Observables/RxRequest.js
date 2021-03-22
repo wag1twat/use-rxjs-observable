@@ -57,15 +57,13 @@ var RxRequest = /** @class */ (function (_super) {
         };
         _this.initialStateListener = function () {
             return _this.initialState$
-                .pipe(operators_1.distinctUntilKeyChanged("status"))
+                .pipe(operators_1.distinctUntilChanged())
                 .subscribe(function (initialState) { return _this.state$.next(initialState); });
         };
         _this.stateListener = function (observer) {
             var onSuccess = _this.options$.getValue().onSuccess;
             var onError = _this.options$.getValue().onError;
-            return _this.state$
-                .pipe(operators_1.distinctUntilKeyChanged("status"))
-                .subscribe(function (state) {
+            return _this.state$.pipe(operators_1.distinctUntilChanged()).subscribe(function (state) {
                 if (onSuccess) {
                     if (state.status === "success") {
                         onSuccess(state);
@@ -84,6 +82,7 @@ var RxRequest = /** @class */ (function (_super) {
                 .pipe(operators_1.distinctUntilChanged())
                 .subscribe(function (_a) {
                 var fetchOnMount = _a.fetchOnMount, refetchInterval = _a.refetchInterval;
+                _this.state$.next(_this.getInitialState());
                 if (fetchOnMount && !refetchInterval) {
                     _this.fetch();
                 }
@@ -112,7 +111,7 @@ var RxRequest = /** @class */ (function (_super) {
                             body: body,
                             params: params, requestId: _this.requestId$.getValue() }, config), state);
                     });
-                }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilKeyChanged("status"))
+                }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilChanged())
                     .forEach(function (result) {
                     _this.state$.next(result);
                 });
@@ -130,7 +129,7 @@ var RxRequest = /** @class */ (function (_super) {
                         requestId: _this.requestId$.getValue()
                     }, state);
                 });
-            }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilKeyChanged("status"))
+            }), operators_1.mergeMap(function (v) { return v; }), operators_1.distinctUntilChanged())
                 .forEach(function (result) {
                 _this.state$.next(result);
             });

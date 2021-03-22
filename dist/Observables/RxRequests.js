@@ -102,8 +102,8 @@ var RxRequests = /** @class */ (function (_super) {
             });
         };
         _this.optionsListener = function (observer) {
-            _this.state$.next(_this.getInitialState());
             return _this.options$.pipe(operators_1.distinctUntilChanged()).subscribe(function (options) {
+                _this.state$.next(_this.getInitialState());
                 var fetchOnMount = options.fetchOnMount, refetchInterval = options.refetchInterval;
                 if (fetchOnMount && !refetchInterval) {
                     _this.fetch();
