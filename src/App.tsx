@@ -21,7 +21,7 @@ type Todo = {
 };
 
 type RxRequestsState = {
-  "request-01": RxRequestResult<Todo, AxiosError>;
+  "request-01": RxRequestResult<Todo, { message: string }>;
   "request-02": RxRequestResult<Todo, any>;
   "request-03": RxRequestResult<Todo, any>;
 };
@@ -65,13 +65,13 @@ function App() {
       console.log("success", state);
     },
     onError: (state) => {
-      console.log("error", state);
+      console.log("error", state["request-01"]?.error?.response?.data.message);
     },
   });
 
-  React.useEffect(() => {
-    fetch();
-  }, [fetch]);
+  // React.useEffect(() => {
+  //   fetch();
+  // }, [fetch]);
 
   React.useEffect(() => {
     console.log("state", state);

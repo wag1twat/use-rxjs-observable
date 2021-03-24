@@ -21,17 +21,17 @@ type Todo = {
 };
 
 type RxRequestsState = {
-  "request-01": RxRequestResult<Todo, AxiosError>;
-  "request-02": RxRequestResult<Todo, AxiosError>;
-  "request-03": RxRequestResult<Todo, AxiosError>;
-  "request-04": RxRequestResult<Todo, AxiosError>;
+  "request-01": RxRequestResult<Todo, any>;
+  "request-02": RxRequestResult<Todo, any>;
+  "request-03": RxRequestResult<Todo, any>;
+  "request-04": RxRequestResult<Todo, any>;
 };
 // === or others types it's work === //
 // type RxRequestsState = {
-//   "request-01": RxRequestResult<TodoJob, AxiosError<TodoJobError>>;
-//   "request-02": RxRequestResult<TodoJob, AxiosError<TodoJobError>>;
-//   "request-03": RxRequestResult<TodoSport, AxiosError<TodoSportError>>;
-//   "request-04": RxRequestResult<TodoCar, AxiosError<TodoCarError>>;
+//   "request-01": RxRequestResult<TodoJob, TodoJobError>;
+//   "request-02": RxRequestResult<TodoJob, TodoJobError>;
+//   "request-03": RxRequestResult<TodoSport, TodoSportError>;
+//   "request-04": RxRequestResult<TodoCar, TodoCarError>;
 // };
 
 function App() {
