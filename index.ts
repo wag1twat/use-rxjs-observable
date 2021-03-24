@@ -1,41 +1,17 @@
-import useRxJsRequest from "./dist/useRxJsRequest";
-import useRxJsRequests from "./dist/useRxJsRequests";
 import {
-  RxUseRequestOptions,
-  RxRequestStateListener,
-  RxUseRequestState,
-  RxRequestOptionsListener,
-  RxRequestFetchFn,
-  UseRxRequestValue,
-  RxRequestConfigure,
+  useRxJsRequests,
   RxUseRequestsOptions,
-  RxRequestsStateListener,
-  RxUseRequestsState,
-  RxRequestsOptionsListener,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestResult,
-} from "./dist/types";
+} from "./dist";
 
-export type {
-  RxUseRequestOptions,
-  RxRequestStateListener,
-  RxUseRequestState,
-  RxRequestOptionsListener,
-  RxRequestFetchFn,
-  UseRxRequestValue,
-  RxRequestConfigure,
+export {
+  useRxJsRequests,
   RxUseRequestsOptions,
-  RxRequestsStateListener,
-  RxUseRequestsState,
-  RxRequestsOptionsListener,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestResult,
 };
-
-export { useRxJsRequest, useRxJsRequests };

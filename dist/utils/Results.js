@@ -1,77 +1,47 @@
 "use strict";
 exports.__esModule = true;
-exports.IdleRxRequest = exports.LoadingRxRequest = exports.ErrorRxRequest = exports.SuccessRxRequest = void 0;
-var SuccessRxRequest = /** @class */ (function () {
-    function SuccessRxRequest(response, _a) {
-        if (response === void 0) { response = null; }
-        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
+exports.Error = exports.Success = exports.Loading = exports.Idle = void 0;
+var Idle = /** @class */ (function () {
+    function Idle(requestId) {
         this.isLoading = false;
-        this.response = response;
-        this.error = null;
-        this.status = "success";
-        this.requestId = requestId;
-        this.url = url;
-        this.method = method;
-        this.body = body;
-        this.params = params;
-        this.timestamp = new Date();
-    }
-    return SuccessRxRequest;
-}());
-exports.SuccessRxRequest = SuccessRxRequest;
-var ErrorRxRequest = /** @class */ (function () {
-    function ErrorRxRequest(error, _a) {
-        if (error === void 0) { error = null; }
-        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
-        this.isLoading = false;
-        this.response = null;
-        this.error = error;
-        this.status = "error";
-        this.requestId = requestId;
-        this.url = url;
-        this.method = method;
-        this.body = body;
-        this.params = params;
-        this.timestamp = new Date();
-    }
-    return ErrorRxRequest;
-}());
-exports.ErrorRxRequest = ErrorRxRequest;
-var LoadingRxRequest = /** @class */ (function () {
-    function LoadingRxRequest(response, error, _a) {
-        if (response === void 0) { response = null; }
-        if (error === void 0) { error = null; }
-        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
-        this.isLoading = true;
-        this.response = response;
-        this.error = error;
-        this.status = "loading";
-        this.requestId = requestId;
-        this.url = url;
-        this.method = method;
-        this.body = body;
-        this.params = params;
-        this.timestamp = new Date();
-    }
-    return LoadingRxRequest;
-}());
-exports.LoadingRxRequest = LoadingRxRequest;
-var IdleRxRequest = /** @class */ (function () {
-    function IdleRxRequest(response, error, _a) {
-        if (response === void 0) { response = null; }
-        if (error === void 0) { error = null; }
-        var requestId = _a.requestId, url = _a.url, method = _a.method, body = _a.body, params = _a.params;
-        this.isLoading = false;
-        this.response = response;
-        this.error = error;
         this.status = "idle";
+        this.response = null;
+        this.error = null;
         this.requestId = requestId;
-        this.url = url;
-        this.method = method;
-        this.body = body;
-        this.params = params;
-        this.timestamp = new Date();
     }
-    return IdleRxRequest;
+    return Idle;
 }());
-exports.IdleRxRequest = IdleRxRequest;
+exports.Idle = Idle;
+var Loading = /** @class */ (function () {
+    function Loading(requestId) {
+        this.isLoading = true;
+        this.status = "loading";
+        this.response = null;
+        this.error = null;
+        this.requestId = requestId;
+    }
+    return Loading;
+}());
+exports.Loading = Loading;
+var Success = /** @class */ (function () {
+    function Success(requestId, response) {
+        this.isLoading = false;
+        this.status = "success";
+        this.error = null;
+        this.requestId = requestId;
+        this.response = response;
+    }
+    return Success;
+}());
+exports.Success = Success;
+var Error = /** @class */ (function () {
+    function Error(requestId, error) {
+        this.isLoading = false;
+        this.status = "error";
+        this.response = null;
+        this.requestId = requestId;
+        this.error = error;
+    }
+    return Error;
+}());
+exports.Error = Error;
