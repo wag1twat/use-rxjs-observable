@@ -1,121 +1,57 @@
-import { RxRequestConfig, RxRequestResult } from "../types";
+import { AxiosResponse, AxiosError } from "axios";
 
-export class SuccessRxRequest<Data> implements RxRequestResult<Data, null> {
-  readonly isLoading: false;
-  readonly response: RxRequestResult<Data, null>["response"];
-  readonly error: null;
-  readonly status: "success";
+export class Idle {
   readonly requestId: string;
-  readonly url: RxRequestConfig["url"];
-  readonly method: RxRequestConfig["method"];
-  readonly body: RxRequestConfig["body"];
-  readonly params: RxRequestConfig["params"];
-  readonly timestamp: Date;
+  readonly isLoading = false;
+  readonly status = "idle";
+  readonly response = null;
+  readonly error = null;
 
-  constructor(
-    response: RxRequestResult<Data, null>["response"] = null,
-    { requestId, url, method, body, params }: RxRequestConfig
-  ) {
-    this.isLoading = false;
+  constructor(requestId: string) {
+    this.requestId = requestId;
+  }
+}
+
+export class Loading {
+  readonly requestId: string;
+  readonly isLoading = true;
+  readonly status = "loading";
+  readonly response = null;
+  readonly error = null;
+
+  constructor(requestId: string) {
+    this.requestId = requestId;
+  }
+}
+
+export class Success<T> {
+  readonly requestId: string;
+  readonly isLoading = false;
+  readonly status = "success";
+  readonly response: T;
+  readonly error = null;
+
+  constructor(requestId: string, response: T) {
+    this.requestId = requestId;
     this.response = response;
-    this.error = null;
-    this.status = "success";
-    this.requestId = requestId;
-    this.url = url;
-    this.method = method;
-    this.body = body;
-    this.params = params;
-    this.timestamp = new Date();
   }
 }
 
-export class ErrorRxRequest<Error> implements RxRequestResult<null, Error> {
-  readonly isLoading: false;
-  readonly response: null;
-  readonly error: RxRequestResult<null, Error>["error"];
-  readonly status: "error";
+export class Error<T> {
   readonly requestId: string;
-  readonly url: RxRequestConfig["url"];
-  readonly method: RxRequestConfig["method"];
-  readonly body: RxRequestConfig["body"];
-  readonly params: RxRequestConfig["params"];
-  readonly timestamp: Date;
+  readonly isLoading = false;
+  readonly status = "error";
+  readonly response = null;
+  readonly error: T;
 
-  constructor(
-    error: RxRequestResult<null, Error>["error"] = null,
-    { requestId, url, method, body, params }: RxRequestConfig
-  ) {
-    this.isLoading = false;
-    this.response = null;
-    this.error = error;
-    this.status = "error";
+  constructor(requestId: string, error: T) {
     this.requestId = requestId;
-    this.url = url;
-    this.method = method;
-    this.body = body;
-    this.params = params;
-    this.timestamp = new Date();
+    this.error = error;
   }
 }
 
-export class LoadingRxRequest<Data, Error>
-  implements RxRequestResult<Data, Error> {
-  readonly isLoading: true;
-  readonly response: RxRequestResult<Data, Error>["response"];
-  readonly error: RxRequestResult<Data, Error>["error"];
-  readonly status: "loading";
-  readonly requestId: string;
-  readonly url: RxRequestConfig["url"];
-  readonly method: RxRequestConfig["method"];
-  readonly body: RxRequestConfig["body"];
-  readonly params: RxRequestConfig["params"];
-  readonly timestamp: Date;
-
-  constructor(
-    response: RxRequestResult<Data, Error>["response"] = null,
-    error: RxRequestResult<Data, Error>["error"] = null,
-    { requestId, url, method, body, params }: RxRequestConfig
-  ) {
-    this.isLoading = true;
-    this.response = response;
-    this.error = error;
-    this.status = "loading";
-    this.requestId = requestId;
-    this.url = url;
-    this.method = method;
-    this.body = body;
-    this.params = params;
-    this.timestamp = new Date();
-  }
-}
-
-export class IdleRxRequest<Data, Error>
-  implements RxRequestResult<Data, Error> {
-  readonly isLoading: false;
-  readonly response: RxRequestResult<Data, Error>["response"];
-  readonly error: RxRequestResult<Data, Error>["error"];
-  readonly status: "idle";
-  readonly requestId: string;
-  readonly url: RxRequestConfig["url"];
-  readonly method: RxRequestConfig["method"];
-  readonly body: RxRequestConfig["body"];
-  readonly params: RxRequestConfig["params"];
-  readonly timestamp: Date;
-
-  constructor(
-    response: RxRequestResult<Data, Error>["response"] = null,
-    error: RxRequestResult<Data, Error>["error"] = null,
-    { requestId, url, method, body, params }: RxRequestConfig
-  ) {
-    this.isLoading = false;
-    this.response = response;
-    this.error = error;
-    this.status = "idle";
-    this.requestId = requestId;
-    this.url = url;
-    this.method = method;
-    this.body = body;
-    this.params = params;
-    this.timestamp = new Date();
-  }
-}
+export type RxRequestResult<D, E> =
+  | Idle
+  | Loading
+  | Success<AxiosResponse<D>>
+  | Error<AxiosError<E>>;

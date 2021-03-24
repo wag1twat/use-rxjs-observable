@@ -1,2 +1,2 @@
-import { RxRequestConfig, UseRxRequestsValue, RxUseRequestsOptions } from "../types";
-export default function useRxJsRequests<Data = any, Error = any>(configs: RxRequestConfig[], { refetchInterval, fetchOnMount, onSuccess, onError, }?: RxUseRequestsOptions<Data, Error>): UseRxRequestsValue<Data, Error>;
+import { RxRequestConfig, UseRxRequestsValue, RxUseRequestsOptions, RxRequestsState } from "../types";
+export default function useRxJsRequests<T = any>(configs: RxRequestConfig[], { refetchInterval, fetchOnMount, onSuccess, onError, }?: RxUseRequestsOptions<RxRequestsState<T>>): UseRxRequestsValue<RxRequestsState<T>>;

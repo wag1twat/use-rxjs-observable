@@ -1,25 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import RxRequests from "../Observables/RxRequests";
 import { useDeepCompareEffect } from "react-use";
+import RxRequests from "../Observables/RxRequests";
 import {
   RxRequestConfig,
-  RxRequestResult,
   UseRxRequestsValue,
   RxUseRequestsOptions,
+  RxRequestsState,
 } from "../types";
 
-export default function useRxJsRequests<Data = any, Error = any>(
+export default function useRxJsRequests<T = any>(
   configs: RxRequestConfig[],
   {
     refetchInterval,
     fetchOnMount,
     onSuccess,
     onError,
-  }: RxUseRequestsOptions<Data, Error> = {}
-): UseRxRequestsValue<Data, Error> {
-  const [state, setState] = useState<RxRequestResult<Data, Error>[]>([]);
+  }: RxUseRequestsOptions<RxRequestsState<T>> = {}
+): UseRxRequestsValue<RxRequestsState<T>> {
+  const [state, setState] = useState<RxRequestsState<T>>({});
 
-  const observable = useMemo(() => new RxRequests<Data, Error>(), []);
+  const observable = useMemo(() => new RxRequests<T>(), []);
 
   useEffect(() => {
     observable.configure({

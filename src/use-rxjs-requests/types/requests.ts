@@ -1,47 +1,39 @@
-import { Subscriber, Subscription } from "rxjs";
-import { RxRequestConfig, RxRequestResult } from "./utils";
-import { RxBaseRequestsOptions } from "./options";
-import { ErrorRxRequest, SuccessRxRequest } from "../utils/Results";
+import { RxRequestConfig } from "./RxRequestConfig";
+import { RxBaseRequestsOptions } from "./RxBaseRequestsOptions";
+import { RxRequestResult } from "../utils/Results";
 
-interface OnSuccessUseRxRequests<Data> {
-  (success: SuccessRxRequest<Data>[]): void;
+interface OnSuccessUseRxRequests<T> {
+  (state: T): void;
 }
 
-interface OnErrorUseRxRequests<Error> {
-  (error: ErrorRxRequest<Error>[]): void;
+interface OnErrorUseRxRequests<T> {
+  (state: T): void;
 }
 
-export interface RxUseRequestsOptions<Data, Error>
-  extends RxBaseRequestsOptions {
-  onSuccess?: OnSuccessUseRxRequests<Data>;
-  onError?: OnErrorUseRxRequests<Error>;
-}
-
-export interface RxRequestsOptionsListener<Data, Error> {
-  (observer: Subscriber<RxRequestResult<Data, Error>[]>): Subscription;
-}
-
-export interface RxRequestsStateListener<Data, Error> {
-  (observer: Subscriber<RxRequestResult<Data, Error>[]>): Subscription;
+export interface RxUseRequestsOptions<T> extends RxBaseRequestsOptions {
+  onSuccess?: OnSuccessUseRxRequests<T>;
+  onError?: OnErrorUseRxRequests<T>;
 }
 
 export interface RxRequestsFetchFn {
   (): void;
 }
 
-export interface UseRxRequestsValue<Data, Error> {
-  state: RxRequestResult<Data, Error>[];
+export interface UseRxRequestsValue<T> {
+  state: Partial<T>;
   fetch: RxRequestsFetchFn;
 }
 
-export interface RxRequestsConfigure<Data, Error> {
+export interface RxRequestsConfigure<T> {
   (
     configuration: Partial<
-      { configs: RxRequestConfig[] } & RxUseRequestsOptions<Data, Error>
+      { configs: RxRequestConfig[] } & RxUseRequestsOptions<T>
     >
   ): void;
 }
 
-export interface RxUseRequestsState<Data, Error> {
-  [key: string]: RxRequestResult<Data, Error>;
-}
+export type RxRequestsState<T> = Partial<
+  T & {
+    [key: string]: RxRequestResult<any, any>;
+  }
+>;

@@ -1,37 +1,16 @@
 import {
-  RxUseRequestOptions,
-  RxRequestStateListener,
-  RxUseRequestState,
-  RxRequestOptionsListener,
-  RxRequestFetchFn,
-  UseRxRequestValue,
-  RxRequestConfigure,
-} from "./request";
-import {
   RxUseRequestsOptions,
-  RxRequestsStateListener,
-  RxUseRequestsState,
-  RxRequestsOptionsListener,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
+  RxRequestsState,
 } from "./requests";
-import { RxRequestConfig, RxRequestResult } from "./utils";
+import { RxRequestConfig } from "./RxRequestConfig";
 export type {
-  RxUseRequestOptions,
-  RxRequestStateListener,
-  RxUseRequestState,
-  RxRequestOptionsListener,
-  RxRequestFetchFn,
-  UseRxRequestValue,
-  RxRequestConfigure,
+  RxRequestsState,
   RxUseRequestsOptions,
-  RxRequestsStateListener,
-  RxUseRequestsState,
-  RxRequestsOptionsListener,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestResult,
 };

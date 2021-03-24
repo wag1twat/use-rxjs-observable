@@ -1,41 +1,19 @@
-import useRxJsRequest from "./useRxJsRequest";
 import useRxJsRequests from "./useRxJsRequests";
 import {
-  RxUseRequestOptions,
-  RxRequestStateListener,
-  RxUseRequestState,
-  RxRequestOptionsListener,
-  RxRequestFetchFn,
-  UseRxRequestValue,
-  RxRequestConfigure,
   RxUseRequestsOptions,
-  RxRequestsStateListener,
-  RxUseRequestsState,
-  RxRequestsOptionsListener,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestResult,
 } from "./types";
-
+import { RxRequestResult } from "./utils/Results";
 export type {
-  RxUseRequestOptions,
-  RxRequestStateListener,
-  RxUseRequestState,
-  RxRequestOptionsListener,
-  RxRequestFetchFn,
-  UseRxRequestValue,
-  RxRequestConfigure,
+  RxRequestResult,
   RxUseRequestsOptions,
-  RxRequestsStateListener,
-  RxUseRequestsState,
-  RxRequestsOptionsListener,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestResult,
 };
 
-export { useRxJsRequest, useRxJsRequests };
+export { useRxJsRequests };
