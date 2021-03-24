@@ -2,16 +2,16 @@ import "./App.css";
 import React from "react";
 import { AxiosError } from "axios";
 import { v4 } from "uuid";
-// import {
-//   useRxJsRequests,
-//   RxRequestConfig,
-//   RxRequestResult,
-// } from "./use-rxjs-requests";
 import {
   useRxJsRequests,
   RxRequestConfig,
   RxRequestResult,
-} from "use-rxjs-requests";
+} from "./use-rxjs-requests";
+// import {
+//   useRxJsRequests,
+//   RxRequestConfig,
+//   RxRequestResult,
+// } from "use-rxjs-requests";
 
 type Todo = {
   completed: boolean;
@@ -62,7 +62,7 @@ function App() {
     refetchInterval: undefined,
     fetchOnMount: false,
     onSuccess: (state) => {
-      console.log("success", state["request-02"]);
+      console.log("success", state);
     },
     onError: (state) => {
       console.log("error", state);

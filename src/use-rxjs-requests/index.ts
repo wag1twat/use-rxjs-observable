@@ -5,8 +5,8 @@ import {
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
+  RxRequestResult,
 } from "./types";
-import { RxRequestResult } from "./utils/Results";
 export type {
   RxRequestResult,
   RxUseRequestsOptions,

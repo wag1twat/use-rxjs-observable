@@ -4,7 +4,7 @@ export declare class RxRequestsOptions<T = any> extends BehaviorSubject<Partial<
     configs: RxRequestConfig[];
 } & RxUseRequestsOptions<RxRequestsState<T>>>> {
     readonly state$: BehaviorSubject<Partial<T & {
-        [key: string]: import("../utils/Results").RxRequestResult<any, any>;
+        [key: string]: import("../types").RxRequestResult<any, any>;
     }>>;
     private interval$?;
     private onResults$;

@@ -1,6 +1,4 @@
 import axios from "axios";
-import reduce from "lodash/reduce";
-import values from "lodash/values";
 import { BehaviorSubject, from, of, Subscription, interval } from "rxjs";
 import {
   startWith,
@@ -19,6 +17,7 @@ import {
   RxRequestsState,
   RxUseRequestsOptions,
 } from "../types";
+import { reduce, values } from "lodash";
 
 export class RxRequestsOptions<T = any> extends BehaviorSubject<
   Partial<

@@ -29,12 +29,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 exports.__esModule = true;
 exports.RxRequestsOptions = void 0;
 var axios_1 = __importDefault(require("axios"));
-var reduce_1 = __importDefault(require("lodash/reduce"));
-var values_1 = __importDefault(require("lodash/values"));
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var equalObjects_1 = require("../utils/equalObjects");
 var Results_1 = require("../utils/Results");
+var lodash_1 = require("lodash");
 var RxRequestsOptions = /** @class */ (function (_super) {
     __extends(RxRequestsOptions, _super);
     function RxRequestsOptions(value) {
@@ -84,7 +83,7 @@ var RxRequestsOptions = /** @class */ (function (_super) {
         };
         _this.subscribe(function (options) {
             if (options.configs) {
-                _this.state$.next(reduce_1["default"](options.configs, function (acc, current) {
+                _this.state$.next(lodash_1.reduce(options.configs, function (acc, current) {
                     var _a;
                     return (__assign(__assign({}, acc), (_a = {}, _a[current.requestId] = new Results_1.Idle(current.requestId), _a)));
                 }, {}));
@@ -95,27 +94,27 @@ var RxRequestsOptions = /** @class */ (function (_super) {
                 if (!fetchOnMount && refetchInterval) {
                     _this.interval$ = rxjs_1.interval(refetchInterval)
                         .pipe(operators_1.startWith(0), operators_1.takeWhile(function () {
-                        return values_1["default"](_this.state$.getValue()).every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "loading"; });
+                        return lodash_1.values(_this.state$.getValue()).every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "loading"; });
                     }))
                         .subscribe(function () { return _this.fetch(); });
                 }
             }
         });
         _this.onResults$ = _this.state$
-            .pipe(operators_1.map(function (state) { return values_1["default"](state); }), operators_1.filter(function (state) {
+            .pipe(operators_1.map(function (state) { return lodash_1.values(state); }), operators_1.filter(function (state) {
             return state.every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "idle"; });
         }), operators_1.filter(function (state) {
             return state.every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "loading"; });
         }), operators_1.concatMap(function (state) {
             return rxjs_1.of({
-                successes: reduce_1["default"](state.filter(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status === "success"; }), function (acc, current) {
+                successes: lodash_1.reduce(state.filter(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status === "success"; }), function (acc, current) {
                     var _a;
                     if (current) {
                         return __assign(__assign({}, acc), (_a = {}, _a[String(current === null || current === void 0 ? void 0 : current.requestId)] = current, _a));
                     }
                     return acc;
                 }, {}),
-                errors: reduce_1["default"](state.filter(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status === "error"; }), function (acc, current) {
+                errors: lodash_1.reduce(state.filter(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status === "error"; }), function (acc, current) {
                     var _a;
                     if (current) {
                         return __assign(__assign({}, acc), (_a = {}, _a[String(current === null || current === void 0 ? void 0 : current.requestId)] = current, _a));
