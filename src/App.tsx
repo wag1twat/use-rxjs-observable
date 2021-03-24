@@ -2,13 +2,16 @@ import "./App.css";
 import React from "react";
 import { AxiosError } from "axios";
 import { v4 } from "uuid";
-import useRxJsRequests from "./use-rxjs-requests/useRxJsRequests";
-import { RxRequestConfig, RxRequestResult } from "./use-rxjs-requests";
 // import {
-//   RxRequestConfig,
-//   useRxJsRequest,
 //   useRxJsRequests,
-// } from "use-rxjs-requests";
+//   RxRequestConfig,
+//   RxRequestResult,
+// } from "./use-rxjs-requests";
+import {
+  useRxJsRequests,
+  RxRequestConfig,
+  RxRequestResult,
+} from "use-rxjs-requests";
 
 type Todo = {
   completed: boolean;
