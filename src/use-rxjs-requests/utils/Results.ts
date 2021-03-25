@@ -1,57 +1,45 @@
 import { AxiosResponse, AxiosError } from "axios";
 
+export interface RxRequestResult<R = any, E = any, ID = string> {
+  readonly requestId: ID;
+  readonly isLoading: boolean;
+  readonly status: "idle" | "loading" | "success" | "error";
+  readonly response: AxiosResponse<R> | null;
+  readonly error: AxiosError<E> | null;
+}
+
 export class Idle {
-  readonly requestId: string;
   readonly isLoading = false;
   readonly status = "idle";
   readonly response = null;
   readonly error = null;
-
-  constructor(requestId: string) {
-    this.requestId = requestId;
-  }
 }
 
 export class Loading {
-  readonly requestId: string;
   readonly isLoading = true;
   readonly status = "loading";
   readonly response = null;
   readonly error = null;
-
-  constructor(requestId: string) {
-    this.requestId = requestId;
-  }
 }
 
-export class Success<T> {
-  readonly requestId: string;
+export class Success<R> {
   readonly isLoading = false;
   readonly status = "success";
-  readonly response: T;
+  readonly response: R | null = null;
   readonly error = null;
 
-  constructor(requestId: string, response: T) {
-    this.requestId = requestId;
+  constructor(response: R) {
     this.response = response;
   }
 }
 
-export class Error<T> {
-  readonly requestId: string;
+export class Error<E> {
   readonly isLoading = false;
   readonly status = "error";
   readonly response = null;
-  readonly error: T;
+  readonly error: E | null;
 
-  constructor(requestId: string, error: T) {
-    this.requestId = requestId;
+  constructor(error: E) {
     this.error = error;
   }
 }
-
-export type RxRequestResult<D, E> =
-  | Idle
-  | Loading
-  | Success<AxiosResponse<D>>
-  | Error<AxiosError<E>>;

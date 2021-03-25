@@ -1,13 +1,11 @@
 import { AxiosRequestConfig } from "axios";
 import { RxRequestResult } from "../utils/Results";
 
-interface RxRequestConfig {
-  requestId: string;
-  url: AxiosRequestConfig["url"];
-  method: AxiosRequestConfig["method"];
-  body?: AxiosRequestConfig["data"];
-  params?: AxiosRequestConfig["params"];
-}
+type C<T> = { [K in keyof T]: AxiosRequestConfig } & {
+  [key: string]: AxiosRequestConfig;
+};
+
+type RxRequestConfig<T = any> = C<T>;
 
 interface RxBaseRequestsOptions {
   fetchOnMount?: boolean;
@@ -32,26 +30,19 @@ interface RxRequestsFetchFn {
 }
 
 interface UseRxRequestsValue<T> {
-  state: Partial<T>;
+  state: T;
   fetch: RxRequestsFetchFn;
 }
 
 interface RxRequestsConfigure<T> {
   (
     configuration: Partial<
-      { configs: RxRequestConfig[] } & RxUseRequestsOptions<T>
+      { configs: RxRequestConfig<T> } & RxUseRequestsOptions<T>
     >
   ): void;
 }
 
-type RxRequestsState<T> = Partial<
-  T & {
-    [key: string]: RxRequestResult<any, any>;
-  }
->;
-
 export type {
-  RxRequestsState,
   RxUseRequestsOptions,
   RxRequestsFetchFn,
   UseRxRequestsValue,

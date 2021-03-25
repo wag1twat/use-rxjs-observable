@@ -1,71 +1,75 @@
 import "./App.css";
 import React from "react";
-import { AxiosError } from "axios";
 import { v4 } from "uuid";
-import {
-  useRxJsRequests,
-  RxRequestConfig,
-  RxRequestResult,
-} from "./use-rxjs-requests";
+import { Box, Grid } from "@chakra-ui/react";
 // import {
 //   useRxJsRequests,
 //   RxRequestConfig,
 //   RxRequestResult,
-// } from "use-rxjs-requests";
+// } from "./use-rxjs-requests";
+import {
+  useRxJsRequests,
+  RxRequestConfig,
+  RxRequestResult,
+} from "use-rxjs-requests";
 
-type Todo = {
+export type Todo = {
   completed: boolean;
   id: number;
   title: string;
   userId: number;
 };
 
-type RxRequestsState = {
-  "request-01": RxRequestResult<Todo, { message: string }>;
-  "request-02": RxRequestResult<Todo, any>;
+export type Post = {
+  body: string;
+  id: number;
+  title: string;
+  userId: number;
+};
+
+export type RequestsResult = {
+  "request-01": RxRequestResult<Todo, any>;
+  "request-02": RxRequestResult<Post, any>;
   "request-03": RxRequestResult<Todo, any>;
 };
 
 function App() {
-  const [configs, setConfigs] = React.useState<RxRequestConfig[]>([
+  const [configs, setConfigs] = React.useState<RxRequestConfig<RequestsResult>>(
     {
-      requestId: "request-02",
-      method: "put",
-      url: "https://jsonplaceholder.typicode.com/todos/1",
-      body: { uuid: v4(), body: { uuid: v4() } },
-      params: { uuid: v4(), params: { uuid: v4() } },
-    },
-    {
-      requestId: "request-03",
-      method: "put",
-      url: "https://jsonplaceholder.typicode.com/todos/2",
-      body: { uuid: v4(), body: { uuid: v4() } },
-      params: { uuid: v4(), params: { uuid: v4() } },
-    },
-    {
-      requestId: "request-04",
-      method: "put",
-      url: "https://jsonplaceholder.typicode.com/todos/3",
-      body: { uuid: v4(), body: { uuid: v4() } },
-      params: { uuid: v4(), params: { uuid: v4() } },
-    },
-    {
-      requestId: "request-05",
-      method: "put",
-      url: "https://jsonplaceholder.typicode.com/todos/4/x",
-      body: { uuid: v4(), body: { uuid: v4() } },
-      params: { uuid: v4(), params: { uuid: v4() } },
-    },
-  ]);
-
-  const { state, fetch } = useRxJsRequests<RxRequestsState>(configs, {
+      "request-02": {
+        method: "get",
+        url: `https://jsonplaceholder.typicode.com/posts/${2}`,
+        data: { uuid: v4(), body: { uuid: v4() } },
+        params: { uuid: v4(), params: { uuid: v4() } },
+      },
+      "request-03": {
+        method: "get",
+        url: `https://jsonplaceholder.typicode.com/todos/${3}`,
+        data: { uuid: v4(), body: { uuid: v4() } },
+        params: { uuid: v4(), params: { uuid: v4() } },
+      },
+      "request-04": {
+        method: "get",
+        url: `https://jsonplaceholder.typicode.com/todos/${3}`,
+        data: { uuid: v4(), body: { uuid: v4() } },
+        params: { uuid: v4(), params: { uuid: v4() } },
+      },
+      "request-01": {
+        method: "get",
+        url: `https://jsonplaceholder.typicode.com/todos/${1}`,
+        data: { uuid: v4(), body: { uuid: v4() } },
+        params: { uuid: v4(), params: { uuid: v4() } },
+      },
+    }
+  );
+  const { state, fetch } = useRxJsRequests<RequestsResult>(configs, {
     refetchInterval: undefined,
     fetchOnMount: false,
     onSuccess: (state) => {
-      console.log("success", state);
+      console.log("onSuccess", state);
     },
     onError: (state) => {
-      console.log("error", state["request-01"]?.error?.response?.data.message);
+      console.log("onError", state);
     },
   });
 
@@ -77,97 +81,163 @@ function App() {
     console.log("state", state);
   }, [state]);
 
+  const updateConfigs = () => {
+    setConfigs({
+      ...configs,
+      "request-01": {
+        method: "put",
+        url: `https://jsonplaceholder.typicode.com/todos/10`,
+        data: { uuid: v4(), body: { uuid: v4() } },
+        params: { uuid: v4(), params: { uuid: v4() } },
+      },
+    });
+  };
+
   return (
     <div className="App">
-      <button
-        style={{ margin: 10 }}
-        onClick={() => {
-          setConfigs([
-            {
-              requestId: "request-02",
-              method: "put",
-              url: "https://jsonplaceholder.typicode.com/todos/1",
-              body: { uuid: v4(), body: { uuid: v4() } },
-              params: { uuid: v4(), params: { uuid: v4() } },
-            },
-            {
-              requestId: "request-03",
-              method: "put",
-              url: "https://jsonplaceholder.typicode.com/todos/2",
-              body: { uuid: v4(), body: { uuid: v4() } },
-              params: { uuid: v4(), params: { uuid: v4() } },
-            },
-            {
-              requestId: "request-04",
-              method: "put",
-              url: "https://jsonplaceholder.typicode.com/todos/1/x",
-              body: { uuid: v4(), body: { uuid: v4() } },
-              params: { uuid: v4(), params: { uuid: v4() } },
-            },
-            {
-              requestId: "request-05",
-              method: "put",
-              url: "https://jsonplaceholder.typicode.com/todos/1/x",
-              body: { uuid: v4(), body: { uuid: v4() } },
-              params: { uuid: v4(), params: { uuid: v4() } },
-            },
-          ]);
-        }}
-      >
+      <Grid>
+        <Grid gap={4} gridTemplateColumns="1fr 1fr 1fr 3fr 3fr">
+          <Box p={2}>Index</Box>
+          <Box p={2}>Status</Box>
+          <Box p={2}>IsLoading</Box>
+          <Box p={2}>Response</Box>
+          <Box p={2}>Error</Box>
+        </Grid>
+      </Grid>
+      {state["request-01"] && (
+        <Grid
+          key={state["request-01"].requestId}
+          gap={4}
+          gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
+          borderBottomWidth="1px"
+          borderColor="gray.200"
+        >
+          <Box p={2}>
+            {JSON.stringify(state["request-01"].requestId, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-01"]?.status, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-01"]?.isLoading, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-01"]?.response?.data, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(
+              {
+                data: state["request-01"]?.error?.response?.data,
+                message: state["request-01"]?.error?.message,
+              },
+              null,
+              2
+            )}
+          </Box>
+        </Grid>
+      )}
+      {state["request-02"] && (
+        <Grid
+          key={state["request-02"].requestId}
+          gap={4}
+          gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
+          borderBottomWidth="1px"
+          borderColor="gray.200"
+        >
+          <Box p={2}>
+            {JSON.stringify(state["request-02"].requestId, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-02"]?.status, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-02"]?.isLoading, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-02"]?.response?.data, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(
+              {
+                data: state["request-02"]?.error?.response?.data,
+                message: state["request-02"]?.error?.message,
+              },
+              null,
+              2
+            )}
+          </Box>
+        </Grid>
+      )}
+      {state["request-03"] && (
+        <Grid
+          key={state["request-03"].requestId}
+          gap={4}
+          gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
+          borderBottomWidth="1px"
+          borderColor="gray.200"
+        >
+          <Box p={2}>
+            {JSON.stringify(state["request-03"].requestId, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-03"]?.status, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-03"]?.isLoading, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-03"]?.response?.data, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(
+              {
+                data: state["request-03"]?.error?.response?.data,
+                message: state["request-03"]?.error?.message,
+              },
+              null,
+              2
+            )}
+          </Box>
+        </Grid>
+      )}
+      {state["request-04"] && (
+        <Grid
+          key={state["request-04"].requestId}
+          gap={4}
+          gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
+          borderBottomWidth="1px"
+          borderColor="gray.200"
+        >
+          <Box p={2}>
+            {JSON.stringify(state["request-04"].requestId, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-04"]?.status, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-04"]?.isLoading, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(state["request-04"]?.response?.data, null, 2)}
+          </Box>
+          <Box p={2}>
+            {JSON.stringify(
+              {
+                data: state["request-04"]?.error?.response?.data,
+                message: state["request-04"]?.error?.message,
+              },
+              null,
+              2
+            )}
+          </Box>
+        </Grid>
+      )}
+      <button style={{ margin: 10 }} onClick={updateConfigs}>
         set configs
       </button>
       <button style={{ margin: 10 }} onClick={() => fetch()}>
         fetch requests
       </button>
-      {Object.values(state).map((res) => {
-        return (
-          <div
-            key={res?.requestId}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 2fr 2fr 2fr 2fr",
-              gap: "10px",
-            }}
-          >
-            <div
-              style={{ display: "flex", flexDirection: "column", padding: 10 }}
-            >
-              <div style={{ color: "red" }}>REQUEST ID</div>
-              <code>{res?.requestId}</code>
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", padding: 10 }}
-            >
-              <div style={{ color: "red" }}>STATUS</div>
-              <code>{res?.status}</code>
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", padding: 10 }}
-            >
-              <div style={{ color: "red" }}>DATA</div>
-              <code>{JSON.stringify(res?.response?.data, null, 2)}</code>
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", padding: 10 }}
-            >
-              <div style={{ color: "red" }}>ERROR</div>
-              <code>{JSON.stringify(res?.error?.message, null, 2)}</code>
-            </div>
-            {/* <div
-              style={{ display: "flex", flexDirection: "column", padding: 10 }}
-            >
-              <div style={{ color: "red" }}>BODY</div>
-              <code>{JSON.stringify(res.body, null, 2)}</code>
-            </div>
-            <div
-              style={{ display: "flex", flexDirection: "column", padding: 10 }}
-            >
-              <div style={{ color: "red" }}>PARAMS</div>
-              <code>{JSON.stringify(res.params, null, 2)}</code>
-            </div> */}
-          </div>
-        );
-      })}
     </div>
   );
 }

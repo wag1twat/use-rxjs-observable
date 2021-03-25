@@ -42,25 +42,24 @@ var RxRequestsOptions = /** @class */ (function (_super) {
         _this.fetch = function () {
             var configs = _this.getValue().configs;
             if (configs) {
-                rxjs_1.from(configs)
-                    .pipe(operators_1.mergeMap(function (v) { return rxjs_1.of(v); }), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }), operators_1.mergeMap(function (axiosConfig) {
+                rxjs_1.of(configs)
+                    .pipe(operators_1.mergeMap(function (v) { return rxjs_1.pairs(v); }), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }), operators_1.mergeMap(function (_a) {
+                    var _b;
+                    var key = _a[0], axiosConfig = _a[1];
+                    var state = _this.state$.getValue();
                     return rxjs_1.from(axios_1["default"]
                         .request(axiosConfig)
                         .then(function (response) {
-                        return new Results_1.Success(axiosConfig.requestId, response);
+                        var _a;
+                        return _a = {}, _a[key] = new Results_1.Success(response), _a;
                     })["catch"](function (error) {
-                        return new Results_1.Error(axiosConfig.requestId, error);
-                    })).pipe(operators_1.startWith(new Results_1.Loading(axiosConfig.requestId)), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
+                        var _a;
+                        return _a = {}, _a[key] = new Results_1.Error(error), _a;
+                    })).pipe(operators_1.startWith((_b = {},
+                        _b[key] = __assign(__assign({}, new Results_1.Loading()), { response: state[key].response, error: state[key].error }),
+                        _b)), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
                 }), operators_1.mergeScan(function (acc, current) {
-                    var _a, _b;
-                    var _c, _d, _e, _f;
-                    if (current.status === "loading") {
-                        var response = ((_c = _this.state$.value[current.requestId]) === null || _c === void 0 ? void 0 : _c.response) ? (_d = _this.state$.value[current.requestId]) === null || _d === void 0 ? void 0 : _d.response : null;
-                        var error = ((_e = _this.state$.value[current.requestId]) === null || _e === void 0 ? void 0 : _e.error) ? (_f = _this.state$.value[current.requestId]) === null || _f === void 0 ? void 0 : _f.error : null;
-                        return rxjs_1.of(__assign(__assign({}, acc), (_a = {}, _a[current.requestId] = __assign(__assign({}, current), { response: response,
-                            error: error }), _a))).pipe(operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
-                    }
-                    return rxjs_1.of(__assign(__assign({}, acc), (_b = {}, _b[current.requestId] = current, _b))).pipe(operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
+                    return rxjs_1.of(__assign(__assign({}, acc), current)).pipe(operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
                 }, _this.state$.getValue()), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }))
                     .forEach(function (result) {
                     _this.state$.next(result);
@@ -83,9 +82,9 @@ var RxRequestsOptions = /** @class */ (function (_super) {
         };
         _this.subscribe(function (options) {
             if (options.configs) {
-                _this.state$.next(lodash_1.reduce(options.configs, function (acc, current) {
+                _this.state$.next(lodash_1.reduce(Object.keys(options.configs), function (acc, current) {
                     var _a;
-                    return (__assign(__assign({}, acc), (_a = {}, _a[current.requestId] = new Results_1.Idle(current.requestId), _a)));
+                    return __assign(__assign({}, acc), (_a = {}, _a[current] = new Results_1.Idle(), _a));
                 }, {}));
                 var _a = _this.getValue(), fetchOnMount = _a.fetchOnMount, refetchInterval = _a.refetchInterval;
                 if (fetchOnMount && !refetchInterval) {
@@ -94,43 +93,53 @@ var RxRequestsOptions = /** @class */ (function (_super) {
                 if (!fetchOnMount && refetchInterval) {
                     _this.interval$ = rxjs_1.interval(refetchInterval)
                         .pipe(operators_1.startWith(0), operators_1.takeWhile(function () {
-                        return lodash_1.values(_this.state$.getValue()).every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "loading"; });
+                        var entries = Object.values(_this.state$.getValue());
+                        return entries.every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "loading"; });
                     }))
                         .subscribe(function () { return _this.fetch(); });
                 }
             }
         });
         _this.onResults$ = _this.state$
-            .pipe(operators_1.map(function (state) { return lodash_1.values(state); }), operators_1.filter(function (state) {
-            return state.every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "idle"; });
-        }), operators_1.filter(function (state) {
-            return state.every(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status !== "loading"; });
-        }), operators_1.concatMap(function (state) {
-            return rxjs_1.of({
-                successes: lodash_1.reduce(state.filter(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status === "success"; }), function (acc, current) {
-                    var _a;
-                    if (current) {
-                        return __assign(__assign({}, acc), (_a = {}, _a[String(current === null || current === void 0 ? void 0 : current.requestId)] = current, _a));
-                    }
-                    return acc;
-                }, {}),
-                errors: lodash_1.reduce(state.filter(function (item) { return (item === null || item === void 0 ? void 0 : item.status) && item.status === "error"; }), function (acc, current) {
-                    var _a;
-                    if (current) {
-                        return __assign(__assign({}, acc), (_a = {}, _a[String(current === null || current === void 0 ? void 0 : current.requestId)] = current, _a));
-                    }
-                    return acc;
-                }, {})
+            .pipe(operators_1.map(function (v) {
+            return Object.entries(v);
+        }), operators_1.filter(function (v) {
+            return v.every(function (_a) {
+                var _ = _a[0], state = _a[1];
+                return state.status !== "idle" && state.status !== "loading";
             });
+        }), operators_1.map(function (v) {
+            var successes = v
+                .filter(function (_a) {
+                var _ = _a[0], state = _a[1];
+                return state.status === "success";
+            })
+                .reduce(function (acc, _a) {
+                var _b;
+                var key = _a[0], state = _a[1];
+                return __assign(__assign({}, acc), (_b = {}, _b[key] = state, _b));
+            }, {});
+            var errors = v
+                .filter(function (_a) {
+                var _ = _a[0], state = _a[1];
+                return state.status === "error";
+            })
+                .reduce(function (acc, _a) {
+                var _b;
+                var key = _a[0], state = _a[1];
+                return __assign(__assign({}, acc), (_b = {}, _b[key] = state, _b));
+            }, {});
+            return { successes: successes, errors: errors };
         }), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }))
-            .subscribe(function (state) {
+            .subscribe(function (_a) {
+            var successes = _a.successes, errors = _a.errors;
             var onSuccess = _this.getValue().onSuccess;
             var onError = _this.getValue().onError;
             if (onSuccess) {
-                onSuccess(state.successes);
+                onSuccess(successes);
             }
             if (onError) {
-                onError(state.errors);
+                onError(errors);
             }
         });
         _this.next = _this.next.bind(_this);

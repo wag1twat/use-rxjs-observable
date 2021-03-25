@@ -1,5 +1,5 @@
-import axios from "axios";
-import { BehaviorSubject, from, of, Subscription, interval } from "rxjs";
+import axios, { AxiosRequestConfig } from "axios";
+import { BehaviorSubject, from, of, Subscription, interval, pairs } from "rxjs";
 import {
   startWith,
   mergeScan,
@@ -8,47 +8,41 @@ import {
   takeWhile,
   map,
   filter,
-  concatMap,
 } from "rxjs/operators";
 import { equalObjects } from "../utils/equalObjects";
-import { Error, Idle, Loading, Success } from "../utils/Results";
 import {
-  RxRequestConfig,
-  RxRequestsState,
-  RxUseRequestsOptions,
-} from "../types";
-import { reduce, values } from "lodash";
+  Error,
+  Idle,
+  Loading,
+  RxRequestResult,
+  Success,
+} from "../utils/Results";
+import { RxRequestConfig, RxUseRequestsOptions } from "../types";
+import { reduce } from "lodash";
 
 export class RxRequestsOptions<T = any> extends BehaviorSubject<
-  Partial<
-    { configs: RxRequestConfig[] } & RxUseRequestsOptions<RxRequestsState<T>>
-  >
+  Partial<{ configs: RxRequestConfig<T> } & RxUseRequestsOptions<T>>
 > {
-  readonly state$ = new BehaviorSubject<RxRequestsState<T>>(
-    {} as RxRequestsState<T>
-  );
+  readonly state$ = new BehaviorSubject<Partial<T>>({} as Partial<T>);
 
   private interval$?: Subscription;
 
   private onResults$: Subscription;
 
   constructor(
-    value: Partial<
-      { configs: RxRequestConfig[] } & RxUseRequestsOptions<RxRequestsState<T>>
-    >
+    value: Partial<{ configs: RxRequestConfig<T> } & RxUseRequestsOptions<T>>
   ) {
     super(value);
 
     this.subscribe((options) => {
       if (options.configs) {
         this.state$.next(
-          reduce<RxRequestConfig, RxRequestsState<T>>(
-            options.configs,
-            (acc, current) => ({
-              ...acc,
-              [current.requestId]: new Idle(current.requestId),
-            }),
-            {}
+          reduce(
+            Object.keys(options.configs),
+            (acc, current) => {
+              return { ...acc, [current]: new Idle() };
+            },
+            {} as T
           )
         );
 
@@ -62,11 +56,14 @@ export class RxRequestsOptions<T = any> extends BehaviorSubject<
           this.interval$ = interval(refetchInterval)
             .pipe(
               startWith(0),
-              takeWhile(() =>
-                values(this.state$.getValue()).every(
+              takeWhile(() => {
+                const entries = Object.values(this.state$.getValue()) as Array<
+                  T[keyof T] extends RxRequestResult ? RxRequestResult : any
+                >;
+                return entries.every(
                   (item) => item?.status && item.status !== "loading"
-                )
-              )
+                );
+              })
             )
             .subscribe(() => this.fetch());
         }
@@ -75,55 +72,49 @@ export class RxRequestsOptions<T = any> extends BehaviorSubject<
 
     this.onResults$ = this.state$
       .pipe(
-        map((state) => values(state)),
-        filter((state) =>
-          state.every((item) => item?.status && item.status !== "idle")
+        map(
+          (v) =>
+            Object.entries(v) as Array<
+              [
+                keyof T,
+                T[keyof T] extends RxRequestResult ? RxRequestResult : any
+              ]
+            >
         ),
-        filter((state) =>
-          state.every((item) => item?.status && item.status !== "loading")
+        filter((v) =>
+          v.every(
+            ([_, state]) =>
+              state.status !== "idle" && state.status !== "loading"
+          )
         ),
-        concatMap((state) => {
-          return of({
-            successes: reduce(
-              state.filter((item) => item?.status && item.status === "success"),
-              (acc, current) => {
-                if (current) {
-                  return {
-                    ...acc,
-                    [String(current?.requestId)]: current,
-                  };
-                }
-                return acc;
-              },
-              {} as RxRequestsState<T>
-            ),
-            errors: reduce(
-              state.filter((item) => item?.status && item.status === "error"),
-              (acc, current) => {
-                if (current) {
-                  return {
-                    ...acc,
-                    [String(current?.requestId)]: current,
-                  };
-                }
-                return acc;
-              },
-              {} as RxRequestsState<T>
-            ),
-          });
+        map((v) => {
+          const successes = v
+            .filter(([_, state]) => state.status === "success")
+            .reduce<T>((acc, [key, state]) => {
+              return { ...acc, [key]: state };
+            }, {} as T);
+
+          const errors = v
+            .filter(([_, state]) => state.status === "error")
+            .reduce<T>((acc, [key, state]) => {
+              return { ...acc, [key]: state };
+            }, {} as T);
+
+          return { successes, errors };
         }),
         distinctUntilChanged((prev, next) => equalObjects(prev, next))
       )
-      .subscribe((state) => {
+      .subscribe(({ successes, errors }) => {
         const onSuccess = this.getValue().onSuccess;
+
         const onError = this.getValue().onError;
 
         if (onSuccess) {
-          onSuccess(state.successes);
+          onSuccess(successes);
         }
 
         if (onError) {
-          onError(state.errors);
+          onError(errors);
         }
       });
 
@@ -135,52 +126,38 @@ export class RxRequestsOptions<T = any> extends BehaviorSubject<
     const { configs } = this.getValue();
 
     if (configs) {
-      from(configs)
+      of(configs)
         .pipe(
-          mergeMap((v) => of(v)),
+          mergeMap((v) => pairs<AxiosRequestConfig>(v)),
           distinctUntilChanged((prev, next) => equalObjects(prev, next)),
-          mergeMap((axiosConfig) => {
+          mergeMap(([key, axiosConfig]) => {
+            const state = (this.state$.getValue() as unknown) as {
+              [key: string]: RxRequestResult;
+            };
             return from(
               axios
                 .request(axiosConfig)
                 .then((response) => {
-                  return new Success<typeof response>(
-                    axiosConfig.requestId,
-                    response
-                  );
+                  return { [key]: new Success<typeof response>(response) };
                 })
-                .catch(
-                  (error) =>
-                    new Error<typeof error>(axiosConfig.requestId, error)
-                )
+                .catch((error) => {
+                  return { [key]: new Error<typeof error>(error) };
+                })
             ).pipe(
-              startWith(new Loading(axiosConfig.requestId)),
+              startWith({
+                [key]: {
+                  ...new Loading(),
+                  response: state[key].response,
+                  error: state[key].error,
+                },
+              }),
               distinctUntilChanged((prev, next) => equalObjects(prev, next))
             );
           }),
           mergeScan((acc, current) => {
-            if (current.status === "loading") {
-              const response = this.state$.value[current.requestId]?.response
-                ? this.state$.value[current.requestId]?.response
-                : null;
-              const error = this.state$.value[current.requestId]?.error
-                ? this.state$.value[current.requestId]?.error
-                : null;
-
-              return of({
-                ...acc,
-                [current.requestId]: {
-                  ...current,
-                  response,
-                  error,
-                },
-              }).pipe(
-                distinctUntilChanged((prev, next) => equalObjects(prev, next))
-              );
-            }
             return of({
               ...acc,
-              [current.requestId]: current,
+              ...current,
             }).pipe(
               distinctUntilChanged((prev, next) => equalObjects(prev, next))
             );
@@ -194,9 +171,7 @@ export class RxRequestsOptions<T = any> extends BehaviorSubject<
   };
 
   readonly next = (
-    value: Partial<
-      { configs: RxRequestConfig[] } & RxUseRequestsOptions<RxRequestsState<T>>
-    >
+    value: Partial<{ configs: RxRequestConfig<T> } & RxUseRequestsOptions<T>>
   ) => {
     const equal = equalObjects(this.getValue(), value);
 

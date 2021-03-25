@@ -5,21 +5,23 @@ import {
   RxRequestConfig,
   UseRxRequestsValue,
   RxUseRequestsOptions,
-  RxRequestsState,
+  RxRequestResult,
 } from "../types";
 
+type S<T> = T & { [key: string]: RxRequestResult };
+
 export default function useRxJsRequests<T = any>(
-  configs: RxRequestConfig[],
+  configs: RxRequestConfig<S<T>>,
   {
     refetchInterval,
     fetchOnMount,
     onSuccess,
     onError,
-  }: RxUseRequestsOptions<RxRequestsState<T>> = {}
-): UseRxRequestsValue<RxRequestsState<T>> {
-  const [state, setState] = useState<RxRequestsState<T>>({});
+  }: RxUseRequestsOptions<S<T>> = {}
+): UseRxRequestsValue<Partial<S<T>>> {
+  const [state, setState] = useState<Partial<S<T>>>({} as Partial<S<T>>);
 
-  const observable = useMemo(() => new RxRequests<T>(), []);
+  const observable = useMemo(() => new RxRequests<S<T>>(), []);
 
   useEffect(() => {
     observable.configure({

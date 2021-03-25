@@ -1,8 +1,8 @@
 import { Observable } from "rxjs";
-import { RxRequestsConfigure, RxRequestsFetchFn, RxRequestsState } from "../types";
-export default class RxRequests<T> extends Observable<RxRequestsState<T>> {
+import { RxRequestsConfigure, RxRequestsFetchFn } from "../types";
+export default class RxRequests<T> extends Observable<Partial<T>> {
     private options$;
     constructor();
-    configure: RxRequestsConfigure<RxRequestsState<T>>;
+    configure: RxRequestsConfigure<T>;
     fetch: RxRequestsFetchFn;
 }
