@@ -1,11 +1,11 @@
 import {
-  useRxJsRequests,
+  RxRequestResult,
   RxUseRequestsOptions,
   RxRequestsFetchFn,
   UseRxRequestsValue,
   RxRequestsConfigure,
   RxRequestConfig,
-  RxRequestResult,
+  useRxJsRequests,
 } from "./dist";
 
 export {
