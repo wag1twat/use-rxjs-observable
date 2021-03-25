@@ -2,16 +2,16 @@ import "./App.css";
 import React from "react";
 import { v4 } from "uuid";
 import { Box, Grid } from "@chakra-ui/react";
-// import {
-//   useRxJsRequests,
-//   RxRequestConfig,
-//   RxRequestResult,
-// } from "./use-rxjs-requests";
 import {
   useRxJsRequests,
   RxRequestConfig,
   RxRequestResult,
-} from "use-rxjs-requests";
+} from "./use-rxjs-requests";
+// import {
+//   useRxJsRequests,
+//   RxRequestConfig,
+//   RxRequestResult,
+// } from "use-rxjs-requests";
 
 export type Todo = {
   completed: boolean;
