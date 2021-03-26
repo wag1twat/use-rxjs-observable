@@ -17,22 +17,24 @@ import {
   RxRequestResult,
   Success,
 } from "../utils/Results";
-import { RxRequestConfig, RxUseRequestsOptions } from "../types";
+import {
+  RxRequestConfig,
+  RxRequestsConfigureArgument,
+  RxUseRequestsOptions,
+} from "../types";
 import { reduce } from "lodash";
 
 export class RxRequestsOptions<T = any> extends BehaviorSubject<
-  Partial<{ configs: RxRequestConfig<T> } & RxUseRequestsOptions<T>>
+  RxRequestsConfigureArgument<T>
 > {
-  readonly state$ = new BehaviorSubject<Partial<T>>({} as Partial<T>);
+  readonly state$ = new BehaviorSubject<Partial<T>>({});
 
   private interval$?: Subscription;
 
   private onResults$: Subscription;
 
-  constructor(
-    value: Partial<{ configs: RxRequestConfig<T> } & RxUseRequestsOptions<T>>
-  ) {
-    super(value);
+  constructor(options: RxRequestsConfigureArgument<T>) {
+    super(options);
 
     this.subscribe((options) => {
       if (options.configs) {
@@ -81,12 +83,12 @@ export class RxRequestsOptions<T = any> extends BehaviorSubject<
               ]
             >
         ),
-        filter((v) =>
-          v.every(
-            ([_, state]) =>
-              state.status !== "idle" && state.status !== "loading"
-          )
-        ),
+        filter((v) => {
+          return v.every(([_, state]) => state.status !== "idle");
+        }),
+        filter((v) => {
+          return v.every(([_, state]) => state.status !== "loading");
+        }),
         map((v) => {
           const successes = v
             .filter(([_, state]) => state.status === "success")

@@ -2,16 +2,16 @@ import "./App.css";
 import React from "react";
 import { v4 } from "uuid";
 import { Box, Grid } from "@chakra-ui/react";
-import {
-  useRxJsRequests,
-  RxRequestConfig,
-  RxRequestResult,
-} from "./use-rxjs-requests";
 // import {
 //   useRxJsRequests,
 //   RxRequestConfig,
 //   RxRequestResult,
-// } from "use-rxjs-requests";
+// } from "./use-rxjs-requests";
+import {
+  useRxJsRequests,
+  RxRequestConfig,
+  RxRequestResult,
+} from "use-rxjs-requests";
 
 export type Todo = {
   completed: boolean;
@@ -36,6 +36,12 @@ export type RequestsResult = {
 function App() {
   const [configs, setConfigs] = React.useState<RxRequestConfig<RequestsResult>>(
     {
+      "request-01": {
+        method: "get",
+        url: `https://jsonplaceholder.typicode.com/todos/${1}`,
+        data: { uuid: v4(), body: { uuid: v4() } },
+        params: { uuid: v4(), params: { uuid: v4() } },
+      },
       "request-02": {
         method: "get",
         url: `https://jsonplaceholder.typicode.com/posts/${2}`,
@@ -51,12 +57,6 @@ function App() {
       "request-04": {
         method: "get",
         url: `https://jsonplaceholder.typicode.com/todos/${3}`,
-        data: { uuid: v4(), body: { uuid: v4() } },
-        params: { uuid: v4(), params: { uuid: v4() } },
-      },
-      "request-01": {
-        method: "get",
-        url: `https://jsonplaceholder.typicode.com/todos/${1}`,
         data: { uuid: v4(), body: { uuid: v4() } },
         params: { uuid: v4(), params: { uuid: v4() } },
       },

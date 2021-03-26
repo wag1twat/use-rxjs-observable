@@ -1,7 +1,6 @@
 import { AxiosResponse, AxiosError } from "axios";
 
-export interface RxRequestResult<R = any, E = any, ID = string> {
-  readonly requestId: ID;
+export interface RxRequestResult<R = any, E = any> {
   readonly isLoading: boolean;
   readonly status: "idle" | "loading" | "success" | "error";
   readonly response: AxiosResponse<R> | null;
