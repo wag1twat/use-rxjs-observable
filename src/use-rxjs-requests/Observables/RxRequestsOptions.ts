@@ -1,28 +1,24 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { BehaviorSubject, from, of, Subscription, interval, pairs } from "rxjs";
+import { AxiosRequestConfig } from "axios";
+import { BehaviorSubject, of, Subscription, interval, pairs } from "rxjs";
 import {
   startWith,
-  mergeScan,
   mergeMap,
   distinctUntilChanged,
   takeWhile,
   map,
   filter,
+  scan,
 } from "rxjs/operators";
 import { equalObjects } from "../utils/equalObjects";
-import {
-  Error,
-  Idle,
-  Loading,
-  RxRequestResult,
-  Success,
-} from "../utils/Results";
+import { Idle, RxRequestResult } from "../utils/Results";
 import {
   RxRequestConfig,
   RxRequestsConfigureArgument,
   RxUseRequestsOptions,
 } from "../types";
 import { reduce } from "lodash";
+import { equalArray } from "../utils/equalArray";
+import { ObservableRequest } from "./ObservableRequest";
 
 export class RxRequestsOptions<T = any> extends BehaviorSubject<
   RxRequestsConfigureArgument<T>
@@ -131,39 +127,16 @@ export class RxRequestsOptions<T = any> extends BehaviorSubject<
       of(configs)
         .pipe(
           mergeMap((v) => pairs<AxiosRequestConfig>(v)),
-          distinctUntilChanged((prev, next) => equalObjects(prev, next)),
+          distinctUntilChanged((prev, next) => equalArray(prev, next)),
           mergeMap(([key, axiosConfig]) => {
-            const state = (this.state$.getValue() as unknown) as {
-              [key: string]: RxRequestResult;
-            };
-            return from(
-              axios
-                .request(axiosConfig)
-                .then((response) => {
-                  return { [key]: new Success<typeof response>(response) };
-                })
-                .catch((error) => {
-                  return { [key]: new Error<typeof error>(error) };
-                })
-            ).pipe(
-              startWith({
-                [key]: {
-                  ...new Loading(),
-                  response: state[key].response,
-                  error: state[key].error,
-                },
-              }),
+            return new ObservableRequest(key, axiosConfig).pipe(
               distinctUntilChanged((prev, next) => equalObjects(prev, next))
             );
           }),
-          mergeScan((acc, current) => {
-            return of({
-              ...acc,
-              ...current,
-            }).pipe(
-              distinctUntilChanged((prev, next) => equalObjects(prev, next))
-            );
-          }, this.state$.getValue()),
+          scan(
+            (acc, current) => ({ ...acc, ...current }),
+            this.state$.getValue()
+          ),
           distinctUntilChanged((prev, next) => equalObjects(prev, next))
         )
         .forEach((result) => {
