@@ -1,11 +1,13 @@
 import { AxiosRequestConfig } from "axios";
 import { RxRequestResult } from "../utils/Results";
-declare type C<T> = {
+declare type State<T> = T & {
+    [key: string]: RxRequestResult;
+};
+declare type RxRequestConfig<T = any> = {
     [K in keyof T]: AxiosRequestConfig;
 } & {
     [key: string]: AxiosRequestConfig;
 };
-declare type RxRequestConfig<T = any> = C<T>;
 interface RxBaseRequestsOptions {
     fetchOnMount?: boolean;
     refetchInterval?: number;
@@ -27,9 +29,10 @@ interface UseRxRequestsValue<T> {
     state: T;
     fetch: RxRequestsFetchFn;
 }
+declare type RxRequestsConfigureArgument<T> = Partial<{
+    configs: RxRequestConfig<T>;
+} & RxUseRequestsOptions<T>>;
 interface RxRequestsConfigure<T> {
-    (configuration: Partial<{
-        configs: RxRequestConfig<T>;
-    } & RxUseRequestsOptions<T>>): void;
+    (options: RxRequestsConfigureArgument<T>): void;
 }
-export type { RxUseRequestsOptions, RxRequestsFetchFn, UseRxRequestsValue, RxRequestsConfigure, RxRequestConfig, RxRequestResult, };
+export type { State, RxRequestsConfigureArgument, RxUseRequestsOptions, RxRequestsFetchFn, UseRxRequestsValue, RxRequestsConfigure, RxRequestConfig, RxRequestResult, };

@@ -36,8 +36,8 @@ var Results_1 = require("../utils/Results");
 var lodash_1 = require("lodash");
 var RxRequestsOptions = /** @class */ (function (_super) {
     __extends(RxRequestsOptions, _super);
-    function RxRequestsOptions(value) {
-        var _this = _super.call(this, value) || this;
+    function RxRequestsOptions(options) {
+        var _this = _super.call(this, options) || this;
         _this.state$ = new rxjs_1.BehaviorSubject({});
         _this.fetch = function () {
             var configs = _this.getValue().configs;
@@ -106,7 +106,12 @@ var RxRequestsOptions = /** @class */ (function (_super) {
         }), operators_1.filter(function (v) {
             return v.every(function (_a) {
                 var _ = _a[0], state = _a[1];
-                return state.status !== "idle" && state.status !== "loading";
+                return state.status !== "idle";
+            });
+        }), operators_1.filter(function (v) {
+            return v.every(function (_a) {
+                var _ = _a[0], state = _a[1];
+                return state.status !== "loading";
             });
         }), operators_1.map(function (v) {
             var successes = v
