@@ -106,15 +106,11 @@ function App() {
       </Grid>
       {state["request-01"] && (
         <Grid
-          key={state["request-01"].requestId}
           gap={4}
           gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
           borderBottomWidth="1px"
           borderColor="gray.200"
         >
-          <Box p={2}>
-            {JSON.stringify(state["request-01"].requestId, null, 2)}
-          </Box>
           <Box p={2}>
             {JSON.stringify(state["request-01"]?.status, null, 2)}
           </Box>
@@ -138,15 +134,11 @@ function App() {
       )}
       {state["request-02"] && (
         <Grid
-          key={state["request-02"].requestId}
           gap={4}
           gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
           borderBottomWidth="1px"
           borderColor="gray.200"
         >
-          <Box p={2}>
-            {JSON.stringify(state["request-02"].requestId, null, 2)}
-          </Box>
           <Box p={2}>
             {JSON.stringify(state["request-02"]?.status, null, 2)}
           </Box>
@@ -170,15 +162,11 @@ function App() {
       )}
       {state["request-03"] && (
         <Grid
-          key={state["request-03"].requestId}
           gap={4}
           gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
           borderBottomWidth="1px"
           borderColor="gray.200"
         >
-          <Box p={2}>
-            {JSON.stringify(state["request-03"].requestId, null, 2)}
-          </Box>
           <Box p={2}>
             {JSON.stringify(state["request-03"]?.status, null, 2)}
           </Box>
@@ -202,15 +190,11 @@ function App() {
       )}
       {state["request-04"] && (
         <Grid
-          key={state["request-04"].requestId}
           gap={4}
           gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
           borderBottomWidth="1px"
           borderColor="gray.200"
         >
-          <Box p={2}>
-            {JSON.stringify(state["request-04"].requestId, null, 2)}
-          </Box>
           <Box p={2}>
             {JSON.stringify(state["request-04"]?.status, null, 2)}
           </Box>
