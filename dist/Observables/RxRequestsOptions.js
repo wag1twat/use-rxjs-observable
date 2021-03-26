@@ -23,17 +23,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
 exports.RxRequestsOptions = void 0;
-var axios_1 = __importDefault(require("axios"));
 var rxjs_1 = require("rxjs");
 var operators_1 = require("rxjs/operators");
 var equalObjects_1 = require("../utils/equalObjects");
 var Results_1 = require("../utils/Results");
 var lodash_1 = require("lodash");
+var equalArray_1 = require("../utils/equalArray");
+var ObservableRequest_1 = require("./ObservableRequest");
 var RxRequestsOptions = /** @class */ (function (_super) {
     __extends(RxRequestsOptions, _super);
     function RxRequestsOptions(options) {
@@ -43,24 +41,10 @@ var RxRequestsOptions = /** @class */ (function (_super) {
             var configs = _this.getValue().configs;
             if (configs) {
                 rxjs_1.of(configs)
-                    .pipe(operators_1.mergeMap(function (v) { return rxjs_1.pairs(v); }), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }), operators_1.mergeMap(function (_a) {
-                    var _b;
+                    .pipe(operators_1.mergeMap(function (v) { return rxjs_1.pairs(v); }), operators_1.distinctUntilChanged(function (prev, next) { return equalArray_1.equalArray(prev, next); }), operators_1.mergeMap(function (_a) {
                     var key = _a[0], axiosConfig = _a[1];
-                    var state = _this.state$.getValue();
-                    return rxjs_1.from(axios_1["default"]
-                        .request(axiosConfig)
-                        .then(function (response) {
-                        var _a;
-                        return _a = {}, _a[key] = new Results_1.Success(response), _a;
-                    })["catch"](function (error) {
-                        var _a;
-                        return _a = {}, _a[key] = new Results_1.Error(error), _a;
-                    })).pipe(operators_1.startWith((_b = {},
-                        _b[key] = __assign(__assign({}, new Results_1.Loading()), { response: state[key].response, error: state[key].error }),
-                        _b)), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
-                }), operators_1.mergeScan(function (acc, current) {
-                    return rxjs_1.of(__assign(__assign({}, acc), current)).pipe(operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
-                }, _this.state$.getValue()), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }))
+                    return new ObservableRequest_1.ObservableRequest(key, axiosConfig).pipe(operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }));
+                }), operators_1.scan(function (acc, current) { return (__assign(__assign({}, acc), current)); }, _this.state$.getValue()), operators_1.distinctUntilChanged(function (prev, next) { return equalObjects_1.equalObjects(prev, next); }))
                     .forEach(function (result) {
                     _this.state$.next(result);
                 });

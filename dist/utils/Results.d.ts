@@ -1,7 +1,7 @@
 import { AxiosResponse, AxiosError } from "axios";
 export interface RxRequestResult<R = any, E = any> {
     readonly isLoading: boolean;
-    readonly status: "idle" | "loading" | "success" | "error";
+    readonly status: "idle" | "loading" | "success" | "error" | "cancel";
     readonly response: AxiosResponse<R> | null;
     readonly error: AxiosError<E> | null;
 }
@@ -11,11 +11,12 @@ export declare class Idle {
     readonly response: any;
     readonly error: any;
 }
-export declare class Loading {
+export declare class Loading<R, E> {
     readonly isLoading = true;
     readonly status = "loading";
-    readonly response: any;
-    readonly error: any;
+    readonly response: R | null;
+    readonly error: E | null;
+    constructor(response: R, error: E);
 }
 export declare class Success<R> {
     readonly isLoading = false;
@@ -30,4 +31,11 @@ export declare class Error<E> {
     readonly response: any;
     readonly error: E | null;
     constructor(error: E);
+}
+export declare class CanceledRequest {
+    readonly isLoading = false;
+    readonly status = "cancel";
+    readonly response: any;
+    readonly error: AxiosError;
+    constructor(message: string);
 }

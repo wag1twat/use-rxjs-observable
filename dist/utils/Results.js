@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.Error = exports.Success = exports.Loading = exports.Idle = void 0;
+exports.CanceledRequest = exports.Error = exports.Success = exports.Loading = exports.Idle = void 0;
 var Idle = /** @class */ (function () {
     function Idle() {
         this.isLoading = false;
@@ -12,11 +12,13 @@ var Idle = /** @class */ (function () {
 }());
 exports.Idle = Idle;
 var Loading = /** @class */ (function () {
-    function Loading() {
+    function Loading(response, error) {
         this.isLoading = true;
         this.status = "loading";
         this.response = null;
         this.error = null;
+        this.response = response;
+        this.error = error;
     }
     return Loading;
 }());
@@ -42,3 +44,30 @@ var Error = /** @class */ (function () {
     return Error;
 }());
 exports.Error = Error;
+var CanceledRequest = /** @class */ (function () {
+    function CanceledRequest(message) {
+        this.isLoading = false;
+        this.status = "cancel";
+        this.response = null;
+        this.error = {
+            config: {},
+            isAxiosError: true,
+            toJSON: function () {
+                return {};
+            },
+            name: "",
+            message: ""
+        };
+        this.error = {
+            config: {},
+            isAxiosError: true,
+            toJSON: function () {
+                return {};
+            },
+            name: "",
+            message: message
+        };
+    }
+    return CanceledRequest;
+}());
+exports.CanceledRequest = CanceledRequest;
