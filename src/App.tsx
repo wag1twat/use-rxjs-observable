@@ -7,6 +7,7 @@ import {
   RxRequestConfig,
   RxRequestResult,
 } from "./use-rxjs-requests";
+import useRequests, { RxRequestConfig as Config } from "./test-features";
 // import {
 //   useRxJsRequests,
 //   RxRequestConfig,
@@ -34,7 +35,47 @@ export type RequestsResult = {
   request4: RxRequestResult<Todo, any>;
 };
 
+export type Result = {
+  requetId1: RxRequestResult<Todo, any>;
+  requetId2: RxRequestResult<Post, any>;
+  requetId3: RxRequestResult<Todo, any>;
+  requetId4: RxRequestResult<Todo, any>;
+};
+
 function App() {
+  const cfgs: Config[] = [
+    {
+      requetId: "requetId1",
+      method: "put",
+      url: `https://jsonplaceholder.typicode.com/todos/${1}`,
+      data: { uuid: v4(), body: { uuid: v4() } },
+      params: { uuid: v4(), params: { uuid: v4() } },
+    },
+    {
+      requetId: "requetId2",
+      method: "put",
+      url: `https://jsonplaceholder.typicode.com/todos/${2}`,
+      data: { uuid: v4(), body: { uuid: v4() } },
+      params: { uuid: v4(), params: { uuid: v4() } },
+    },
+    {
+      requetId: "requetId3",
+      method: "put",
+      url: `https://jsonplaceholder.typicode.com/todos/${3}`,
+      data: { uuid: v4(), body: { uuid: v4() } },
+      params: { uuid: v4(), params: { uuid: v4() } },
+    },
+    {
+      requetId: "requetId4",
+      method: "put",
+      url: `https://jsonplaceholder.typicode.com/todos/${4}/x`,
+      data: { uuid: v4(), body: { uuid: v4() } },
+      params: { uuid: v4(), params: { uuid: v4() } },
+    },
+  ];
+
+  const { fetch: get, state } = useRequests<Result>(cfgs);
+
   const [configs, setConfigs] = React.useState<RxRequestConfig<RequestsResult>>(
     {
       request1: {
@@ -69,37 +110,38 @@ function App() {
       },
     }
   );
-  const { state, fetch } = useRxJsRequests<RequestsResult>(configs, {
-    refetchInterval: undefined,
-    fetchOnMount: false,
-    onSuccess: (state) => {
-      console.log("onSuccess", state);
-    },
-    onError: (state) => {
-      console.log("onError", state);
-    },
-  });
+  // const { state, fetch } = useRxJsRequests<RequestsResult>(configs, {
+  //   refetchInterval: undefined,
+  //   fetchOnMount: false,
+  //   onSuccess: (state) => {
+  //     console.log("onSuccess", state);
+  //   },
+  //   onError: (state) => {
+  //     console.log("onError", state);
+  //   },
+  // });
 
   // React.useEffect(() => {
   //   fetch();
   // }, [fetch]);
 
-  React.useEffect(() => {
-    console.log("state", state);
-  }, [state]);
+  // React.useEffect(() => {
+  //   console.log("state", state);
+  // }, [state]);
 
-  const updateConfigs = () => {
-    setConfigs({
-      ...configs,
-      request1: {
-        method: "put",
-        url: `https://jsonplaceholder.typicode.com/todos/10`,
-        data: { uuid: v4(), body: { uuid: v4() } },
-        params: { uuid: v4(), params: { uuid: v4() } },
-      },
-    });
-  };
+  // const updateConfigs = () => {
+  //   setConfigs({
+  //     ...configs,
+  //     request1: {
+  //       method: "put",
+  //       url: `https://jsonplaceholder.typicode.com/todos/10`,
+  //       data: { uuid: v4(), body: { uuid: v4() } },
+  //       params: { uuid: v4(), params: { uuid: v4() } },
+  //     },
+  //   });
+  // };
 
+  React.useEffect(() => {}, [state]);
   return (
     <div className="App">
       <Grid>
@@ -110,7 +152,7 @@ function App() {
           <Box p={2}>Error</Box>
         </Grid>
       </Grid>
-      {state.request1 && (
+      {/* {state.request1 && (
         <Grid
           gap={4}
           gridTemplateColumns="1fr 1fr 1fr 3fr 3fr"
@@ -232,8 +274,8 @@ function App() {
       )}
       <Button style={{ margin: 10 }} onClick={updateConfigs}>
         set configs
-      </Button>
-      <Button style={{ margin: 10 }} onClick={() => fetch()}>
+      </Button> */}
+      <Button style={{ margin: 10 }} onClick={() => get()}>
         fetch requests
       </Button>
     </div>

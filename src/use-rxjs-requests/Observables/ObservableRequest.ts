@@ -1,9 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  CancelTokenSource,
-} from "axios";
+import axios, { AxiosRequestConfig, CancelTokenSource } from "axios";
 import { Subscriber, Observer, Observable } from "rxjs";
 import {
   CanceledRequest,
@@ -15,12 +10,10 @@ import {
 
 let source: CancelTokenSource | undefined;
 
-class SubscribeRequest<R, E> extends Subscriber<{
-  [key: string]: RxRequestResult<R, E>;
-}> {
+export class SubscribeRequest extends Subscriber<RxRequestResult> {
   constructor(
     key: string,
-    observer: Observer<RxRequestResult<R, E>>,
+    observer: Observer<RxRequestResult>,
     config: AxiosRequestConfig
   ) {
     super(observer);
@@ -36,7 +29,7 @@ class SubscribeRequest<R, E> extends Subscriber<{
     axios.interceptors.request.use((axiosConfig) => {
       const loading = new Loading(null, null);
 
-      self.next({ [key]: loading });
+      self.next(loading);
 
       if (source) {
         axiosConfig.cancelToken = source.token;
@@ -47,25 +40,23 @@ class SubscribeRequest<R, E> extends Subscriber<{
 
     axios
       .request(config)
-      .then((response: AxiosResponse<R>) => {
+      .then((response) => {
         const success = new Success<typeof response>(response);
-
-        self.next({ [key]: success });
+        self.next(success);
 
         self.complete();
       })
-      .catch((e: AxiosError<E>) => {
+      .catch((e) => {
         if (axios.isCancel(e)) {
           const error = new CanceledRequest(e.message);
-
-          self.next({ [key]: error });
+          self.next(error);
 
           self.complete();
         }
 
         const error = new Error<typeof e>(e);
 
-        self.next({ [key]: error });
+        self.next(error);
 
         self.complete();
       });
@@ -83,7 +74,7 @@ export class ObservableRequest<R = any, E = any> extends Observable<
 > {
   constructor(key: string, config: AxiosRequestConfig) {
     super((observer) => {
-      new SubscribeRequest<R, E>(key, observer, config);
+      new SubscribeRequest(key, observer, config);
     });
   }
 }
