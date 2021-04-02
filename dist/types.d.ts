@@ -11,4 +11,14 @@ declare type Result<R, E> = {
     response: Response<R> | null;
     error: Error<E> | null;
 };
-export type { Config, Result };
+declare type onSuccess<T> = {
+    (state: T): void;
+};
+declare type onError<T> = {
+    (state: T): void;
+};
+declare type Handlers<T> = {
+    onSuccess?: onSuccess<T>;
+    onError?: onError<T>;
+};
+export type { Config, Result, Handlers };

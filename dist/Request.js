@@ -43,7 +43,9 @@ var Request = /** @class */ (function (_super) {
                     new RequestSubscriber_1.RequestSubscriber(observer, Object.assign(v, axiosConfig));
                 });
             }))
-                .subscribe(updater);
+                .subscribe(function (result) {
+                updater(result);
+            });
         };
         return _this;
     }
