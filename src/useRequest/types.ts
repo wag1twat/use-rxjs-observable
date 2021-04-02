@@ -17,4 +17,17 @@ type Result<R, E> = {
   error: Error<E> | null;
 };
 
-export type { Config, Result };
+type onSuccess<T> = {
+  (state: T): void;
+};
+
+type onError<T> = {
+  (state: T): void;
+};
+
+type Handlers<T> = {
+  onSuccess?: onSuccess<T>;
+  onError?: onError<T>;
+};
+
+export type { Config, Result, Handlers };

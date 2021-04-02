@@ -31,7 +31,9 @@ export class Request<T> extends Subscriber<T> {
             });
           })
         )
-        .subscribe(updater);
+        .subscribe((result) => {
+          updater(result);
+        });
     };
   }
 

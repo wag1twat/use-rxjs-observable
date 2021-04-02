@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRequest } from "./useRequest";
+// import { useRequest } from "use-rxjs-requests";
 import { Config } from "./useRequest/types";
 
 type Post = {
@@ -23,10 +24,25 @@ function App() {
         method: "GET",
         url: "https://jsonplaceholder.typicode.com/posts/1",
       });
-    }, 5000);
+
+      setTimeout(() => {
+        setConfig({
+          requestId: "post 1 error",
+          method: "GET",
+          url: "https://jsonplaceholder.typicode.com/posts/1/x",
+        });
+      }, 4000);
+    }, 8000);
   }, []);
 
-  const { state, fetch } = useRequest<Post>(config);
+  const { state, fetch } = useRequest<Post>(config, {
+    onSuccess: (result) => {
+      console.log("onSuccess", result);
+    },
+    onError: (result) => {
+      console.log("onError", result);
+    },
+  });
 
   useEffect(() => {
     fetch();
