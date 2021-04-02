@@ -1,19 +1,5 @@
-import {
-  RxRequestResult,
-  RxUseRequestsOptions,
-  RxRequestsFetchFn,
-  UseRxRequestsValue,
-  RxRequestsConfigure,
-  RxRequestConfig,
-  useRxJsRequests,
-} from "./dist";
+import { useRequest } from "./dist";
 
-export {
-  RxRequestResult,
-  useRxJsRequests,
-  RxUseRequestsOptions,
-  RxRequestsFetchFn,
-  UseRxRequestsValue,
-  RxRequestsConfigure,
-  RxRequestConfig,
-};
+import { Config, Result } from "./dist/types";
+
+export { useRequest, Config, Result };

@@ -1,8 +1,18 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 exports.__esModule = true;
-exports.useRxJsRequests = void 0;
-var useRxJsRequests_1 = __importDefault(require("./useRxJsRequests"));
-exports.useRxJsRequests = useRxJsRequests_1["default"];
+exports.useRequest = void 0;
+var react_1 = require("react");
+var Request_1 = require("./Request");
+function useRequest(config) {
+    var _a = react_1.useState(), state = _a[0], setState = _a[1];
+    var _b = react_1.useMemo(function () {
+        return new Request_1.Request(config, setState);
+    }, [config]), fetch = _b.fetch, unsubscribe = _b.unsubscribe;
+    react_1.useEffect(function () {
+        return function () {
+            unsubscribe();
+        };
+    }, [unsubscribe]);
+    return { state: state, fetch: fetch };
+}
+exports.useRequest = useRequest;
