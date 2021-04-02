@@ -1,4 +1,5 @@
-import useRxJsRequests from "./useRxJsRequests";
-import { RxUseRequestsOptions, RxRequestsFetchFn, UseRxRequestsValue, RxRequestsConfigure, RxRequestConfig, RxRequestResult } from "./types";
-export type { RxRequestResult, RxUseRequestsOptions, RxRequestsFetchFn, UseRxRequestsValue, RxRequestsConfigure, RxRequestConfig, };
-export { useRxJsRequests };
+import { Config, Result } from "./types";
+export declare function useRequest<R = any, E = any>(config: Config): {
+    state: Result<R, E>;
+    fetch: (axiosConfig?: import("axios").AxiosRequestConfig) => void;
+};
