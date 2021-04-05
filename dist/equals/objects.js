@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.equalObjects = void 0;
-var equalArray_1 = require("./equalArray");
+var arrays_1 = require("./arrays");
 function equalObjects(object1, object2) {
     for (var prop in object1) {
         if (object1.hasOwnProperty(prop) !== object2.hasOwnProperty(prop)) {
@@ -21,7 +21,7 @@ function equalObjects(object1, object2) {
         if (!object1.hasOwnProperty(prop))
             continue;
         if (object1[prop] instanceof Array && object2[prop] instanceof Array) {
-            if (!equalArray_1.equalArray(object1[prop], object2[prop]))
+            if (!arrays_1.equalArray(object1[prop], object2[prop]))
                 return false;
             if (!equalObjects(object1[prop], object2[prop]))
                 return false;

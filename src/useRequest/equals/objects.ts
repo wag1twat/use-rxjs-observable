@@ -1,4 +1,4 @@
-import { equalArray } from "./equalArray";
+import { equalArray } from "./arrays";
 
 export function equalObjects(
   object1: { [key: string]: any },

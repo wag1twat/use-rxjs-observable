@@ -1,4 +1,4 @@
-import { equalObjects } from "./equalObjects";
+import { equalObjects } from "./objects";
 
 export const equalArray = function (array1: any[], array2: any[]) {
   if (!array1 || !array2) return false;
